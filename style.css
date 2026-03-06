@@ -121,8 +121,9 @@ h1 {
   margin: 0 auto;
   border-radius: 50%;
   cursor: grab;
-  background: radial-gradient(circle at 35% 30%, #0f3e5a 0%, #072537 60%, #04141f 100%);
-  border: 1px solid #2f5b71;
+  touch-action: none;
+  background: radial-gradient(circle at 40% 35%, #0b334c 0%, #061e2f 55%, #040f19 100%);
+  border: 1px solid #335f75;
 }
 
 #globe-canvas.dragging {
