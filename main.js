@@ -9,6 +9,11 @@ const formEl = document.getElementById("strike-form");
 const coordInput = document.getElementById("coord-input");
 const fireBtn = document.getElementById("fire-btn");
 const scanBtn = document.getElementById("scan-btn");
+const zoomInBtn = document.getElementById("zoom-in");
+const zoomOutBtn = document.getElementById("zoom-out");
+const resetViewBtn = document.getElementById("reset-view");
+const viewCoordEl = document.getElementById("view-coord");
+const viewZoomEl = document.getElementById("view-zoom");
 const logEl = document.getElementById("log");
 const nodeListEl = document.getElementById("node-list");
 const canvas = document.getElementById("globe-canvas");
@@ -23,11 +28,17 @@ const state = {
   nodes: [],
   cooldownUntil: 0,
   yaw: -0.5,
-  pitch: -0.2,
+  pitch: -0.58,
+  zoom: 0.9,
   dragging: false,
   lastX: 0,
   lastY: 0,
-  cloudShift: 0
+  cloudShift: 0,
+  hoverLat: null,
+  hoverLon: null,
+  stars: [],
+  starFieldWidth: 0,
+  starFieldHeight: 0
 };
 
 function clamp(value, min, max) {
@@ -42,6 +53,16 @@ function setupCanvasSize() {
   canvas.width = Math.round(cssWidth * dpr);
   canvas.height = Math.round(cssHeight * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  if (
+    state.starFieldWidth !== cssWidth ||
+    state.starFieldHeight !== cssHeight ||
+    state.stars.length === 0
+  ) {
+    state.starFieldWidth = cssWidth;
+    state.starFieldHeight = cssHeight;
+    initStarField(cssWidth, cssHeight);
+  }
 }
 
 function parseLatLon(input) {
@@ -107,6 +128,22 @@ function rotateVec(v) {
   };
 }
 
+function inverseRotateVec(v) {
+  const cp = Math.cos(-state.pitch);
+  const sp = Math.sin(-state.pitch);
+  const y1 = v.y * cp - v.z * sp;
+  const z1 = v.y * sp + v.z * cp;
+  const x1 = v.x;
+
+  const cy = Math.cos(-state.yaw);
+  const sy = Math.sin(-state.yaw);
+  return {
+    x: x1 * cy - z1 * sy,
+    y: y1,
+    z: x1 * sy + z1 * cy
+  };
+}
+
 function normalize(v) {
   const m = Math.hypot(v.x, v.y, v.z) || 1;
   return { x: v.x / m, y: v.y / m, z: v.z / m };
@@ -114,6 +151,78 @@ function normalize(v) {
 
 function dot(a, b) {
   return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+function initStarField(width, height) {
+  const area = width * height;
+  const count = Math.max(180, Math.floor(area / 2400));
+  state.stars = Array.from({ length: count }, () => ({
+    x: Math.random() * width,
+    y: Math.random() * height,
+    r: 0.35 + Math.random() * 1.7,
+    a: 0.16 + Math.random() * 0.8,
+    phase: Math.random() * Math.PI * 2
+  }));
+}
+
+function getViewCenter(width, height) {
+  return {
+    cx: width * 0.64,
+    cy: height * 0.57
+  };
+}
+
+function getViewRadius(width, height) {
+  return Math.min(width, height) * 0.32 * state.zoom;
+}
+
+function drawSpaceBackground(width, height, now, cx, cy, radius) {
+  const bg = ctx.createLinearGradient(0, 0, 0, height);
+  bg.addColorStop(0, "#03070e");
+  bg.addColorStop(0.55, "#040b15");
+  bg.addColorStop(1, "#02050d");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, width, height);
+
+  const nebulaA = ctx.createRadialGradient(width * 0.18, height * 0.24, 20, width * 0.18, height * 0.24, width * 0.42);
+  nebulaA.addColorStop(0, "rgba(80, 122, 199, 0.22)");
+  nebulaA.addColorStop(1, "rgba(80, 122, 199, 0)");
+  ctx.fillStyle = nebulaA;
+  ctx.fillRect(0, 0, width, height);
+
+  const nebulaB = ctx.createRadialGradient(width * 0.82, height * 0.74, 10, width * 0.82, height * 0.74, width * 0.32);
+  nebulaB.addColorStop(0, "rgba(43, 135, 174, 0.18)");
+  nebulaB.addColorStop(1, "rgba(43, 135, 174, 0)");
+  ctx.fillStyle = nebulaB;
+  ctx.fillRect(0, 0, width, height);
+
+  for (const star of state.stars) {
+    const twinkle = 0.7 + 0.3 * Math.sin(now * 0.001 + star.phase);
+    ctx.globalAlpha = star.a * twinkle;
+    ctx.fillStyle = "#d8ecff";
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  const orbitGlow = ctx.createRadialGradient(cx, cy, radius * 1.2, cx, cy, radius * 2.25);
+  orbitGlow.addColorStop(0, "rgba(49, 114, 153, 0.06)");
+  orbitGlow.addColorStop(1, "rgba(49, 114, 153, 0)");
+  ctx.fillStyle = orbitGlow;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 2.25, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function updateStatusBar() {
+  const latText =
+    state.hoverLat === null ? "---" : `${state.hoverLat >= 0 ? "N" : "S"} ${Math.abs(state.hoverLat).toFixed(2)}°`;
+  const lonText =
+    state.hoverLon === null ? "---" : `${state.hoverLon >= 0 ? "E" : "W"} ${Math.abs(state.hoverLon).toFixed(2)}°`;
+
+  viewCoordEl.textContent = `Lat ${latText}, Lon ${lonText}`;
+  viewZoomEl.textContent = `Zoom x${state.zoom.toFixed(2)}`;
 }
 
 function hash2(a, b) {
@@ -200,17 +309,17 @@ function cloudNoise(lat, lon) {
 function drawGlobe() {
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
-  const cx = width / 2;
-  const cy = height / 2;
-  const radius = Math.min(width, height) * 0.46;
-  const now = Date.now() * 0.00008;
+  const { cx, cy } = getViewCenter(width, height);
+  const radius = getViewRadius(width, height);
+  const nowMs = Date.now();
+  const now = nowMs * 0.00008;
   const sun = normalize({
     x: Math.cos(now),
     y: 0.32,
     z: Math.sin(now)
   });
 
-  ctx.clearRect(0, 0, width, height);
+  drawSpaceBackground(width, height, nowMs, cx, cy, radius);
 
   const halo = ctx.createRadialGradient(cx, cy, radius * 0.96, cx, cy, radius * 1.22);
   halo.addColorStop(0, "rgba(93, 190, 255, 0.12)");
@@ -455,23 +564,59 @@ function runScan(rawInput) {
   drawGlobe();
 }
 
+function setZoom(nextZoom) {
+  state.zoom = clamp(nextZoom, 0.6, 1.55);
+  updateStatusBar();
+}
+
+function updateHoverCoordinate(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const x = clientX - rect.left;
+  const y = clientY - rect.top;
+  const { cx, cy } = getViewCenter(rect.width, rect.height);
+  const radius = getViewRadius(rect.width, rect.height);
+
+  const nx = (x - cx) / radius;
+  const ny = (cy - y) / radius;
+  const r2 = nx * nx + ny * ny;
+
+  if (r2 > 1) {
+    state.hoverLat = null;
+    state.hoverLon = null;
+    updateStatusBar();
+    return;
+  }
+
+  const nz = Math.sqrt(Math.max(0, 1 - r2));
+  const world = inverseRotateVec({ x: nx, y: ny, z: nz });
+  const lat = (Math.asin(clamp(world.y, -1, 1)) * 180) / Math.PI;
+  const lon = (Math.atan2(world.z, world.x) * 180) / Math.PI;
+
+  state.hoverLat = lat;
+  state.hoverLon = lon;
+  updateStatusBar();
+}
+
 function handlePointerDown(event) {
   state.dragging = true;
   canvas.classList.add("dragging");
   state.lastX = event.clientX;
   state.lastY = event.clientY;
+  updateHoverCoordinate(event.clientX, event.clientY);
 }
 
 function handlePointerMove(event) {
-  if (!state.dragging) return;
-  const dx = event.clientX - state.lastX;
-  const dy = event.clientY - state.lastY;
-  state.lastX = event.clientX;
-  state.lastY = event.clientY;
+  if (state.dragging) {
+    const dx = event.clientX - state.lastX;
+    const dy = event.clientY - state.lastY;
+    state.lastX = event.clientX;
+    state.lastY = event.clientY;
 
-  state.yaw += dx * 0.007;
-  state.pitch = clamp(state.pitch + dy * 0.005, -1.2, 1.2);
-  drawGlobe();
+    state.yaw -= dx * 0.007;
+    state.pitch = clamp(state.pitch + dy * 0.005, -1.2, 1.2);
+    drawGlobe();
+  }
+  updateHoverCoordinate(event.clientX, event.clientY);
 }
 
 function handlePointerUp() {
@@ -494,6 +639,42 @@ function initEvents() {
   });
 
   canvas.addEventListener("pointerdown", handlePointerDown);
+  canvas.addEventListener("pointerenter", (event) => {
+    updateHoverCoordinate(event.clientX, event.clientY);
+  });
+  canvas.addEventListener("pointerleave", () => {
+    state.hoverLat = null;
+    state.hoverLon = null;
+    updateStatusBar();
+  });
+  canvas.addEventListener(
+    "wheel",
+    (event) => {
+      event.preventDefault();
+      const delta = event.deltaY > 0 ? -0.08 : 0.08;
+      setZoom(state.zoom + delta);
+      drawGlobe();
+    },
+    { passive: false }
+  );
+
+  zoomInBtn.addEventListener("click", () => {
+    setZoom(state.zoom + 0.12);
+    drawGlobe();
+  });
+
+  zoomOutBtn.addEventListener("click", () => {
+    setZoom(state.zoom - 0.12);
+    drawGlobe();
+  });
+
+  resetViewBtn.addEventListener("click", () => {
+    state.yaw = -0.5;
+    state.pitch = -0.58;
+    setZoom(0.9);
+    drawGlobe();
+  });
+
   window.addEventListener("pointermove", handlePointerMove);
   window.addEventListener("pointerup", handlePointerUp);
   window.addEventListener("pointercancel", handlePointerUp);
@@ -513,7 +694,7 @@ function initEvents() {
 
 function animate() {
   if (!state.dragging) {
-    state.yaw += 0.0007;
+    state.yaw += 0.00035;
   }
   state.cloudShift = (state.cloudShift + 0.00065) % (Math.PI * 2);
   drawGlobe();
@@ -523,6 +704,7 @@ function animate() {
 initEvents();
 newRound();
 updateHud();
+updateStatusBar();
 addLog("Tracker online. 지구를 드래그해 회전하고 좌표를 스캔하세요.");
 setInterval(tickCooldown, 100);
 requestAnimationFrame(() => {
