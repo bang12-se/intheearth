@@ -232,7 +232,22 @@ button:disabled {
   background: #0a1824d9;
   color: #e6f3ff;
   border: 1px solid #30495d;
-  font-size: 1.08rem;
+  font-size: 1rem;
+  display: grid;
+  place-items: center;
+}
+
+#compass-btn {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 4px;
+}
+
+#compass-needle {
+  display: inline-block;
+  font-size: 1.1rem;
+  transform: rotate(var(--heading, 0deg));
+  transition: transform 120ms linear;
 }
 
 .status-bar {

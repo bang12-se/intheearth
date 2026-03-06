@@ -47,14 +47,22 @@
       </aside>
 
       <div class="map-tools">
+        <button id="compass-btn" aria-label="Reset north">
+          <span id="compass-needle">▲</span>
+        </button>
         <button id="zoom-in" aria-label="Zoom in">+</button>
         <button id="zoom-out" aria-label="Zoom out">-</button>
+        <button id="tilt-up" aria-label="Tilt up">⌃</button>
+        <button id="tilt-down" aria-label="Tilt down">⌄</button>
         <button id="reset-view" aria-label="Reset view">N</button>
       </div>
 
       <footer class="status-bar">
         <span id="view-coord">Lat ---, Lon ---</span>
         <span id="view-zoom">Zoom x1.00</span>
+        <span id="view-heading">Heading ---</span>
+        <span id="view-tilt">Tilt ---</span>
+        <span id="view-alt">Alt --- km</span>
         <span>Orbit navigation enabled</span>
       </footer>
     </section>

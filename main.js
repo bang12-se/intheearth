@@ -11,9 +11,16 @@ const fireBtn = document.getElementById("fire-btn");
 const scanBtn = document.getElementById("scan-btn");
 const zoomInBtn = document.getElementById("zoom-in");
 const zoomOutBtn = document.getElementById("zoom-out");
+const tiltUpBtn = document.getElementById("tilt-up");
+const tiltDownBtn = document.getElementById("tilt-down");
+const compassBtn = document.getElementById("compass-btn");
+const compassNeedle = document.getElementById("compass-needle");
 const resetViewBtn = document.getElementById("reset-view");
 const viewCoordEl = document.getElementById("view-coord");
 const viewZoomEl = document.getElementById("view-zoom");
+const viewHeadingEl = document.getElementById("view-heading");
+const viewTiltEl = document.getElementById("view-tilt");
+const viewAltEl = document.getElementById("view-alt");
 const logEl = document.getElementById("log");
 const nodeListEl = document.getElementById("node-list");
 const canvas = document.getElementById("globe-canvas");
@@ -223,6 +230,14 @@ function updateStatusBar() {
 
   viewCoordEl.textContent = `Lat ${latText}, Lon ${lonText}`;
   viewZoomEl.textContent = `Zoom x${state.zoom.toFixed(2)}`;
+  const heading = ((state.yaw * 180) / Math.PI) % 360;
+  const headingNormalized = (heading + 360) % 360;
+  const tiltDeg = clamp((Math.abs(state.pitch) * 180) / Math.PI, 0, 89);
+  const altitudeKm = 23500 / Math.pow(state.zoom, 1.45);
+  viewHeadingEl.textContent = `Heading ${headingNormalized.toFixed(1)}°`;
+  viewTiltEl.textContent = `Tilt ${tiltDeg.toFixed(1)}°`;
+  viewAltEl.textContent = `Alt ${Math.round(altitudeKm).toLocaleString()} km`;
+  compassNeedle.style.setProperty("--heading", `${-headingNormalized}deg`);
 }
 
 function hash2(a, b) {
@@ -668,10 +683,29 @@ function initEvents() {
     drawGlobe();
   });
 
+  tiltUpBtn.addEventListener("click", () => {
+    state.pitch = clamp(state.pitch - 0.08, -1.25, 1.25);
+    updateStatusBar();
+    drawGlobe();
+  });
+
+  tiltDownBtn.addEventListener("click", () => {
+    state.pitch = clamp(state.pitch + 0.08, -1.25, 1.25);
+    updateStatusBar();
+    drawGlobe();
+  });
+
+  compassBtn.addEventListener("click", () => {
+    state.yaw = 0;
+    updateStatusBar();
+    drawGlobe();
+  });
+
   resetViewBtn.addEventListener("click", () => {
     state.yaw = -0.5;
     state.pitch = -0.58;
     setZoom(0.9);
+    updateStatusBar();
     drawGlobe();
   });
 
