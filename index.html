@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Orbital Strike Grid</title>
+  <title>Geo Signal Tracker</title>
   <link href="/style.css" rel="stylesheet" />
 </head>
 <body>
   <main class="app">
     <header class="panel header">
       <p class="eyebrow">Simulation Mode</p>
-      <h1>Orbital Strike Grid</h1>
-      <p class="sub">가상 좌표를 입력해 타깃을 맞히는 SF 전략 시뮬레이터</p>
+      <h1>Geo Signal Tracker</h1>
+      <p class="sub">현실 위도/경도를 입력해 지구상의 가상 신호원을 탐지하는 전략 시뮬레이터</p>
     </header>
 
     <section class="panel hud">
@@ -20,11 +20,11 @@
         <strong id="score">0</strong>
       </div>
       <div class="stat">
-        <span>Shots</span>
+        <span>Scans</span>
         <strong id="shots">0</strong>
       </div>
       <div class="stat">
-        <span>Hits</span>
+        <span>Detections</span>
         <strong id="hits">0</strong>
       </div>
       <div class="stat">
@@ -35,32 +35,31 @@
 
     <section class="playzone">
       <div class="panel grid-wrap">
-        <div class="grid-label">Target Grid (A-J / 1-10)</div>
-        <div id="grid" class="grid" aria-label="virtual target grid"></div>
+        <div class="grid-label">Signal Nodes (총 6개)</div>
+        <div id="grid" class="grid" aria-label="signal status grid"></div>
       </div>
 
       <aside class="panel controls">
-        <h2>Launch Console</h2>
+        <h2>Scan Console</h2>
         <form id="strike-form" autocomplete="off">
-          <label for="coord-input">Coordinate</label>
+          <label for="coord-input">Latitude, Longitude</label>
           <div class="input-row">
             <input
               id="coord-input"
               name="coord"
               type="text"
-              placeholder="예: C7"
-              maxlength="3"
+              placeholder="예: 37.5665, 126.9780"
               required
             />
-            <button id="fire-btn" type="submit">Launch</button>
+            <button id="fire-btn" type="submit">Scan</button>
           </div>
         </form>
 
         <div class="hint">
-          임의로 생성되는 타깃 6개를 모두 맞히면 다음 라운드로 넘어갑니다.
+          각 라운드마다 임의의 신호원 6개가 생성됩니다. 좌표를 스캔해 모두 탐지하세요.
         </div>
 
-        <button id="scan-btn" class="secondary" type="button">New Scan</button>
+        <button id="scan-btn" class="secondary" type="button">New Sweep</button>
 
         <div class="log-wrap">
           <h3>Mission Log</h3>

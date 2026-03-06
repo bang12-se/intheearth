@@ -1,6 +1,5 @@
-const ROWS = "ABCDEFGHIJ";
-const COLS = 10;
 const TARGET_COUNT = 6;
+const DETECT_KM = 220;
 
 const scoreEl = document.getElementById("score");
 const shotsEl = document.getElementById("shots");
@@ -15,51 +14,40 @@ const logEl = document.getElementById("log");
 
 const state = {
   score: 0,
-  shots: 0,
-  hits: 0,
+  scans: 0,
+  detections: 0,
   round: 1,
-  targets: new Set(),
-  resolved: new Set(),
+  nodes: [],
   cooldownUntil: 0
 };
 
-function coordToId(row, col) {
-  return `${row}${col}`;
-}
-
-function parseCoordinate(input) {
-  const clean = input.trim().toUpperCase().replace(/\s+/g, "");
-  const match = clean.match(/^([A-J])(10|[1-9])$/);
+function parseLatLon(input) {
+  const match = input
+    .trim()
+    .match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
   if (!match) return null;
-  return coordToId(match[1], Number(match[2]));
+
+  const lat = Number(match[1]);
+  const lon = Number(match[2]);
+  if (Number.isNaN(lat) || Number.isNaN(lon)) return null;
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
+
+  return { lat, lon };
 }
 
-function buildGrid() {
-  gridEl.innerHTML = "";
-  for (const row of ROWS) {
-    for (let col = 1; col <= COLS; col += 1) {
-      const id = coordToId(row, col);
-      const cell = document.createElement("button");
-      cell.type = "button";
-      cell.className = "cell";
-      cell.dataset.id = id;
-      cell.textContent = id;
-      cell.addEventListener("click", () => {
-        coordInput.value = id;
-        coordInput.focus();
-      });
-      gridEl.appendChild(cell);
-    }
-  }
-}
+function haversineKm(a, b) {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const r = 6371;
+  const dLat = toRad(b.lat - a.lat);
+  const dLon = toRad(b.lon - a.lon);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
 
-function pickTargets() {
-  state.targets.clear();
-  while (state.targets.size < TARGET_COUNT) {
-    const row = ROWS[Math.floor(Math.random() * ROWS.length)];
-    const col = 1 + Math.floor(Math.random() * COLS);
-    state.targets.add(coordToId(row, col));
-  }
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+
+  return 2 * r * Math.asin(Math.sqrt(h));
 }
 
 function addLog(message) {
@@ -71,31 +59,27 @@ function addLog(message) {
   }
 }
 
-function markCell(id, className) {
-  const cell = gridEl.querySelector(`[data-id="${id}"]`);
-  if (!cell) return;
-  cell.classList.add(className);
-}
-
-function resetGridMarks() {
-  gridEl.querySelectorAll(".cell").forEach((el) => {
-    el.classList.remove("hit", "miss", "target-reveal");
+function renderGrid() {
+  gridEl.innerHTML = "";
+  state.nodes.forEach((node, i) => {
+    const item = document.createElement("div");
+    item.className = "cell";
+    if (node.detected) item.classList.add("hit");
+    item.textContent = `N${i + 1}`;
+    gridEl.appendChild(item);
   });
 }
 
 function updateHud() {
   scoreEl.textContent = String(state.score);
-  shotsEl.textContent = String(state.shots);
-  hitsEl.textContent = String(state.hits);
+  shotsEl.textContent = String(state.scans);
+  hitsEl.textContent = String(state.detections);
 }
 
 function tickCooldown() {
-  const now = Date.now();
-  const remain = Math.max(0, state.cooldownUntil - now);
-
+  const remain = Math.max(0, state.cooldownUntil - Date.now());
   if (remain > 0) {
-    const sec = (remain / 1000).toFixed(1);
-    cooldownEl.textContent = `${sec}s`;
+    cooldownEl.textContent = `${(remain / 1000).toFixed(1)}s`;
     fireBtn.disabled = true;
   } else {
     cooldownEl.textContent = "Ready";
@@ -103,79 +87,83 @@ function tickCooldown() {
   }
 }
 
-function launchStrike(raw) {
-  const id = parseCoordinate(raw);
-  if (!id) {
-    addLog("Invalid coordinate. Use A1 to J10 format.");
-    return;
-  }
+function newRound() {
+  state.nodes = Array.from({ length: TARGET_COUNT }, () => ({
+    lat: -70 + Math.random() * 140,
+    lon: -180 + Math.random() * 360,
+    detected: false
+  }));
+  renderGrid();
+  updateHud();
+  coordInput.value = "";
+}
 
-  if (state.resolved.has(id)) {
-    addLog(`${id}: already engaged.`);
+function runScan(rawInput) {
+  const probe = parseLatLon(rawInput);
+  if (!probe) {
+    addLog("잘못된 좌표입니다. 위도,경도 형식으로 입력하세요.");
     return;
   }
 
   if (Date.now() < state.cooldownUntil) {
-    addLog("Launcher cooling down.");
+    addLog("스캐너 쿨다운 중입니다.");
     return;
   }
 
-  state.shots += 1;
-  state.resolved.add(id);
+  state.scans += 1;
   state.cooldownUntil = Date.now() + 1200;
 
-  if (state.targets.has(id)) {
-    state.hits += 1;
-    state.score += 120;
-    markCell(id, "hit");
-    addLog(`${id}: direct hit.`);
+  let nearest = null;
+  let nearestIndex = -1;
+
+  state.nodes.forEach((node, idx) => {
+    if (node.detected) return;
+    const d = haversineKm(probe, node);
+    if (!nearest || d < nearest) {
+      nearest = d;
+      nearestIndex = idx;
+    }
+  });
+
+  if (nearest !== null && nearest <= DETECT_KM) {
+    state.nodes[nearestIndex].detected = true;
+    state.detections += 1;
+    const gained = Math.max(60, Math.round(250 - nearest));
+    state.score += gained;
+    addLog(
+      `탐지 성공: N${nearestIndex + 1} (${nearest.toFixed(1)}km), +${gained}점`
+    );
   } else {
-    state.score = Math.max(0, state.score - 15);
-    markCell(id, "miss");
-    addLog(`${id}: miss.`);
+    state.score = Math.max(0, state.score - 20);
+    const text = nearest === null ? "-" : `${nearest.toFixed(1)}km`;
+    addLog(`신호 미탐지. 최근접 거리: ${text}`);
   }
 
-  if (state.hits % TARGET_COUNT === 0) {
+  if (state.nodes.every((n) => n.detected)) {
     state.round += 1;
-    state.score += 250;
-    addLog(`Round ${state.round - 1} cleared. New scan started.`);
-    startRound();
+    state.score += 300;
+    addLog(`라운드 ${state.round - 1} 완료. 다음 스윕 시작.`);
+    newRound();
     return;
   }
 
+  renderGrid();
   updateHud();
 }
 
-function revealTargets() {
-  state.targets.forEach((id) => {
-    if (!state.resolved.has(id)) markCell(id, "target-reveal");
-  });
-}
-
-function startRound() {
-  state.targets.clear();
-  state.resolved.clear();
-  pickTargets();
-  resetGridMarks();
-  updateHud();
-  coordInput.value = "";
-  revealTargets();
-}
-
-buildGrid();
-startRound();
-addLog("Simulation online. Enter a coordinate and launch.");
+newRound();
+addLog("Tracker online. 현실 좌표를 입력해 스캔하세요.");
 
 formEl.addEventListener("submit", (event) => {
   event.preventDefault();
-  launchStrike(coordInput.value);
+  runScan(coordInput.value);
   coordInput.select();
 });
 
 scanBtn.addEventListener("click", () => {
-  state.score = Math.max(0, state.score - 40);
-  addLog("Manual scan requested. Score -40.");
-  startRound();
+  state.score = Math.max(0, state.score - 50);
+  addLog("수동 스윕 실행. 점수 -50.");
+  newRound();
 });
 
 setInterval(tickCooldown, 100);
