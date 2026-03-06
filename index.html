@@ -1,14 +1,75 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+  <title>Orbital Strike Grid</title>
+  <link href="/style.css" rel="stylesheet" />
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
+  <main class="app">
+    <header class="panel header">
+      <p class="eyebrow">Simulation Mode</p>
+      <h1>Orbital Strike Grid</h1>
+      <p class="sub">가상 좌표를 입력해 타깃을 맞히는 SF 전략 시뮬레이터</p>
+    </header>
+
+    <section class="panel hud">
+      <div class="stat">
+        <span>Score</span>
+        <strong id="score">0</strong>
+      </div>
+      <div class="stat">
+        <span>Shots</span>
+        <strong id="shots">0</strong>
+      </div>
+      <div class="stat">
+        <span>Hits</span>
+        <strong id="hits">0</strong>
+      </div>
+      <div class="stat">
+        <span>Cooldown</span>
+        <strong id="cooldown">Ready</strong>
+      </div>
+    </section>
+
+    <section class="playzone">
+      <div class="panel grid-wrap">
+        <div class="grid-label">Target Grid (A-J / 1-10)</div>
+        <div id="grid" class="grid" aria-label="virtual target grid"></div>
+      </div>
+
+      <aside class="panel controls">
+        <h2>Launch Console</h2>
+        <form id="strike-form" autocomplete="off">
+          <label for="coord-input">Coordinate</label>
+          <div class="input-row">
+            <input
+              id="coord-input"
+              name="coord"
+              type="text"
+              placeholder="예: C7"
+              maxlength="3"
+              required
+            />
+            <button id="fire-btn" type="submit">Launch</button>
+          </div>
+        </form>
+
+        <div class="hint">
+          임의로 생성되는 타깃 6개를 모두 맞히면 다음 라운드로 넘어갑니다.
+        </div>
+
+        <button id="scan-btn" class="secondary" type="button">New Scan</button>
+
+        <div class="log-wrap">
+          <h3>Mission Log</h3>
+          <ul id="log"></ul>
+        </div>
+      </aside>
+    </section>
+  </main>
+
   <script defer type="text/javascript" src="/main.js"></script>
 </body>
 </html>
