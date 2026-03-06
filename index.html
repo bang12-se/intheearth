@@ -9,57 +9,44 @@
 <body>
   <main class="app">
     <header class="panel header">
-      <p class="eyebrow">Simulation Mode</p>
+      <p class="eyebrow">Orbital Monitor</p>
       <h1>Geo Signal Tracker</h1>
-      <p class="sub">현실 위도/경도를 입력해 지구상의 가상 신호원을 탐지하는 전략 시뮬레이터</p>
+      <p class="sub">지구를 드래그해 회전하고, 현실 위도/경도 좌표로 가상 신호원을 탐지합니다.</p>
     </header>
 
     <section class="panel hud">
-      <div class="stat">
-        <span>Score</span>
-        <strong id="score">0</strong>
-      </div>
-      <div class="stat">
-        <span>Scans</span>
-        <strong id="shots">0</strong>
-      </div>
-      <div class="stat">
-        <span>Detections</span>
-        <strong id="hits">0</strong>
-      </div>
-      <div class="stat">
-        <span>Cooldown</span>
-        <strong id="cooldown">Ready</strong>
-      </div>
+      <div class="stat"><span>Score</span><strong id="score">0</strong></div>
+      <div class="stat"><span>Scans</span><strong id="shots">0</strong></div>
+      <div class="stat"><span>Detections</span><strong id="hits">0</strong></div>
+      <div class="stat"><span>Cooldown</span><strong id="cooldown">Ready</strong></div>
     </section>
 
-    <section class="playzone">
-      <div class="panel grid-wrap">
-        <div class="grid-label">Signal Nodes (총 6개)</div>
-        <div id="grid" class="grid" aria-label="signal status grid"></div>
-      </div>
+    <section class="layout">
+      <section class="panel globe-panel">
+        <div class="panel-head">
+          <h2>Earth View</h2>
+          <p>Drag to rotate</p>
+        </div>
+        <canvas id="globe-canvas" width="760" height="760" aria-label="interactive earth"></canvas>
+      </section>
 
       <aside class="panel controls">
         <h2>Scan Console</h2>
         <form id="strike-form" autocomplete="off">
           <label for="coord-input">Latitude, Longitude</label>
           <div class="input-row">
-            <input
-              id="coord-input"
-              name="coord"
-              type="text"
-              placeholder="예: 37.5665, 126.9780"
-              required
-            />
+            <input id="coord-input" name="coord" type="text" placeholder="예: 37.5665, 126.9780" required />
             <button id="fire-btn" type="submit">Scan</button>
           </div>
         </form>
 
-        <div class="hint">
-          각 라운드마다 임의의 신호원 6개가 생성됩니다. 좌표를 스캔해 모두 탐지하세요.
-        </div>
-
+        <p class="hint">탐지 반경은 약 220km입니다. 좌표를 입력해 가장 가까운 신호원을 찾아보세요.</p>
         <button id="scan-btn" class="secondary" type="button">New Sweep</button>
+
+        <div class="node-wrap">
+          <h3>Signal Nodes</h3>
+          <ul id="node-list"></ul>
+        </div>
 
         <div class="log-wrap">
           <h3>Mission Log</h3>
@@ -69,6 +56,6 @@
     </section>
   </main>
 
-  <script defer type="text/javascript" src="/main.js"></script>
+  <script defer src="/main.js"></script>
 </body>
 </html>
