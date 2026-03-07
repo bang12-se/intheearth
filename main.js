@@ -62,6 +62,7 @@ const state = {
   starFieldHeight: 0,
   renderScale: dpr,
   lastRenderTs: 0,
+  lowPerf: true,
   currentPlanet: "earth"
 };
 
@@ -248,10 +249,10 @@ function clamp(value, min, max) {
 function getRenderQuality() {
   const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
   const cores = typeof navigator.hardwareConcurrency === "number" ? navigator.hardwareConcurrency : 4;
-  let quality = coarsePointer ? 1.05 : 1.3;
-  if (cores <= 4) quality -= 0.15;
+  let quality = coarsePointer ? 1 : 1.1;
+  if (cores <= 6) quality -= 0.1;
   if (window.innerWidth < 900) quality -= 0.1;
-  return clamp(quality, 1, 1.45);
+  return clamp(quality, 0.85, 1.12);
 }
 
 function setupCanvasSize() {
@@ -863,10 +864,11 @@ function drawGlobe() {
     y: 0.32,
     z: Math.sin(now)
   });
-  const satelliteStates = state.dragging ? [] : getSatelliteStates(state.currentPlanet, cx, cy, radius, nowMs);
+  const satelliteStates =
+    state.dragging || state.lowPerf ? [] : getSatelliteStates(state.currentPlanet, cx, cy, radius, nowMs);
 
   drawSpaceBackground(width, height, nowMs, cx, cy, radius);
-  if (!state.dragging) {
+  if (!state.dragging && !state.lowPerf) {
     drawSatelliteOrbits(cx, cy, satelliteStates);
     drawSatellites(satelliteStates, false);
   }
@@ -892,7 +894,8 @@ function drawGlobe() {
 
   const zoomDetail = clamp((state.zoom - 0.6) / 0.95, 0, 1);
   const dragPenalty = state.dragging ? 0.48 : 0;
-  const surfaceStep = getSurfaceStep(planet) * (1 - zoomDetail * 0.22 + dragPenalty);
+  const perfPenalty = state.lowPerf ? 0.42 : 0;
+  const surfaceStep = getSurfaceStep(planet) * (1 - zoomDetail * 0.22 + dragPenalty + perfPenalty);
   for (let lat = -88; lat <= 88; lat += surfaceStep) {
     for (let lon = -180; lon <= 180; lon += surfaceStep) {
       const rotated = rotateVec(latLonToVec(lat, lon));
@@ -912,11 +915,13 @@ function drawGlobe() {
       // Intentionally removed night-light dots for a cleaner planetary surface.
     }
   }
-  drawRingShadowOnPlanet(cx, cy, radius, planet);
+  if (!state.lowPerf) {
+    drawRingShadowOnPlanet(cx, cy, radius, planet);
+  }
   // Removed high-contrast dotted overlays for cleaner planetary surfaces.
 
   const withClouds = ["earth", "venus", "jupiter", "saturn", "uranus", "neptune"].includes(state.currentPlanet);
-  if (withClouds) {
+  if (withClouds && !state.lowPerf) {
     const cloudDrift = state.cloudShift * 20;
     const cloudDensity = planet.label === "Venus" ? 1.15 : 1;
     const cloudStep = 4.2 - zoomDetail * 0.35 + (state.dragging ? 0.8 : 0);
@@ -983,9 +988,11 @@ function drawGlobe() {
   ctx.beginPath();
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.fill();
-  drawAtmosphere(cx, cy, radius, planet);
+  if (!state.lowPerf) {
+    drawAtmosphere(cx, cy, radius, planet);
+  }
 
-  if (planet.style === "sun") {
+  if (planet.style === "sun" && !state.lowPerf) {
     const corona = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 1.9);
     corona.addColorStop(0, "rgba(255, 205, 124, 0.1)");
     corona.addColorStop(0.45, "rgba(255, 154, 61, 0.14)");
@@ -995,8 +1002,10 @@ function drawGlobe() {
     ctx.arc(cx, cy, radius * 1.9, 0, Math.PI * 2);
     ctx.fill();
   }
-  drawSolarFlares(cx, cy, radius, planet, nowMs);
-  if (!state.dragging) {
+  if (!state.lowPerf) {
+    drawSolarFlares(cx, cy, radius, planet, nowMs);
+  }
+  if (!state.dragging && !state.lowPerf) {
     drawSatellites(satelliteStates, true);
   }
 
@@ -1326,7 +1335,7 @@ function initEvents() {
 
 function animate() {
   const now = performance.now();
-  if (now - state.lastRenderTs < 33) {
+  if (now - state.lastRenderTs < 66) {
     requestAnimationFrame(animate);
     return;
   }
