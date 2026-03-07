@@ -705,10 +705,10 @@ function getPlanetRimColor(planet) {
 }
 
 function getSurfaceStep(planet) {
-  if (planet.style === "sun") return 1.9;
-  if (planet.style === "gas" || planet.style === "ice") return 2;
-  if (planet.label === "Mercury" || planet.label === "Mars" || planet.label === "Pluto") return 2.1;
-  return 2.3;
+  if (planet.style === "sun") return 1.45;
+  if (planet.style === "gas" || planet.style === "ice") return 1.5;
+  if (planet.label === "Mercury" || planet.label === "Mars" || planet.label === "Pluto") return 1.55;
+  return 1.6;
 }
 
 function drawGasBandOverlay(cx, cy, radius, planet, now) {
@@ -887,8 +887,10 @@ function drawGlobe() {
       const detail = terrainDetail(lat, lon);
       const light = clamp(dot(rotated, sun) * 0.92 + 0.08, 0.05, 1.04);
       ctx.fillStyle = getPlanetColor(planet, lat, lon, detail, light, nowMs * 0.00001);
-      const size = 1.35 + rotated.z * 1.05;
-      ctx.fillRect(x, y, size, size);
+      const size = surfaceStep * (1.15 + rotated.z * 0.42);
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+      ctx.fill();
 
       const nightFactor = clamp(0.36 - dot(rotated, sun), 0, 0.36) / 0.36;
       if (planet.style === "earth" && nightFactor > 0.65 && detail.isLand && !detail.polar && hash2(lat, lon) > 0.964) {
@@ -926,8 +928,10 @@ function drawGlobe() {
             ? "220, 241, 255"
             : "235, 246, 255";
         ctx.fillStyle = `rgba(${cloudColor}, ${alpha})`;
-        const size = 1.8 + rotated.z * 1.25;
-        ctx.fillRect(x, y, size, size);
+        const size = 1.55 + rotated.z * 1.1;
+        ctx.beginPath();
+        ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
   }
