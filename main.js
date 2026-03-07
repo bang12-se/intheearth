@@ -371,6 +371,9 @@ function getViewRadius(width, height) {
 }
 
 function drawSpaceBackground(width, height, now, cx, cy, radius) {
+  const driftX = state.yaw * 120;
+  const driftY = state.pitch * 95;
+
   const bg = ctx.createLinearGradient(0, 0, 0, height);
   bg.addColorStop(0, "#03070e");
   bg.addColorStop(0.55, "#040b15");
@@ -378,13 +381,17 @@ function drawSpaceBackground(width, height, now, cx, cy, radius) {
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, width, height);
 
-  const nebulaA = ctx.createRadialGradient(width * 0.18, height * 0.24, 20, width * 0.18, height * 0.24, width * 0.42);
+  const nebulaAX = width * 0.18 + driftX * 0.35;
+  const nebulaAY = height * 0.24 + driftY * 0.28;
+  const nebulaA = ctx.createRadialGradient(nebulaAX, nebulaAY, 20, nebulaAX, nebulaAY, width * 0.42);
   nebulaA.addColorStop(0, "rgba(80, 122, 199, 0.22)");
   nebulaA.addColorStop(1, "rgba(80, 122, 199, 0)");
   ctx.fillStyle = nebulaA;
   ctx.fillRect(0, 0, width, height);
 
-  const nebulaB = ctx.createRadialGradient(width * 0.82, height * 0.74, 10, width * 0.82, height * 0.74, width * 0.32);
+  const nebulaBX = width * 0.82 - driftX * 0.3;
+  const nebulaBY = height * 0.74 - driftY * 0.24;
+  const nebulaB = ctx.createRadialGradient(nebulaBX, nebulaBY, 10, nebulaBX, nebulaBY, width * 0.32);
   nebulaB.addColorStop(0, "rgba(43, 135, 174, 0.18)");
   nebulaB.addColorStop(1, "rgba(43, 135, 174, 0)");
   ctx.fillStyle = nebulaB;
@@ -392,10 +399,12 @@ function drawSpaceBackground(width, height, now, cx, cy, radius) {
 
   for (const star of state.stars) {
     const twinkle = 0.7 + 0.3 * Math.sin(now * 0.001 + star.phase);
+    const x = ((star.x + driftX * 0.85) % width + width) % width;
+    const y = ((star.y + driftY * 0.65) % height + height) % height;
     ctx.globalAlpha = star.a * twinkle;
     ctx.fillStyle = "#d8ecff";
     ctx.beginPath();
-    ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+    ctx.arc(x, y, star.r, 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.globalAlpha = 1;
