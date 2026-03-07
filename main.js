@@ -272,7 +272,7 @@ function getRenderQuality() {
   if (memory !== null && memory <= 4) quality -= 0.12;
   if (window.innerWidth < 900) quality -= 0.1;
   if (!coarsePointer && window.innerWidth > 1400) quality += 0.08;
-  return clamp(quality, 1, 2.25);
+  return clamp(quality, 1, 2.5);
 }
 
 function setupCanvasSize() {
@@ -879,12 +879,12 @@ function drawContinuousPlanetSurface(cx, cy, radius, planet, sun, nowMs) {
 
 function getEarthTextureSettings() {
   if (state.dragging) {
-    return { latStep: 2.8, lonStep: 2.8, pointSize: 1.7, cloudStep: 4.8 };
+    return { latStep: 2.2, lonStep: 2.2, pointSize: 1.45, cloudStep: 4.1 };
   }
   if (state.lowPerf) {
-    return { latStep: 1.9, lonStep: 1.9, pointSize: 1.35, cloudStep: 3.2 };
+    return { latStep: 1.5, lonStep: 1.5, pointSize: 1.12, cloudStep: 2.6 };
   }
-  return { latStep: 0.85, lonStep: 0.85, pointSize: 0.82, cloudStep: 1.6 };
+  return { latStep: 0.6, lonStep: 0.6, pointSize: 0.66, cloudStep: 1.2 };
 }
 
 function drawEarthTexture(cx, cy, radius, sun, nowMs) {
@@ -928,7 +928,7 @@ function drawEarthTexture(cx, cy, radius, sun, nowMs) {
 }
 
 function drawEarthContinents(cx, cy, radius, nowMs) {
-  const segments = state.lowPerf ? 72 : 130;
+  const segments = state.lowPerf ? 96 : 180;
   for (const blob of CONTINENT_BLOBS) {
     const p = rotateVec(latLonToVec(blob.lat, blob.lon));
     if (p.z <= -0.04) continue;
