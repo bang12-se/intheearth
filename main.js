@@ -646,6 +646,78 @@ function getPlanetRimColor(planet) {
   return "rgba(170, 228, 255, 0.6)";
 }
 
+function getSurfaceStep(planet) {
+  if (planet.style === "sun") return 1.9;
+  if (planet.style === "gas" || planet.style === "ice") return 2;
+  if (planet.label === "Mercury" || planet.label === "Mars" || planet.label === "Pluto") return 2.1;
+  return 2.3;
+}
+
+function drawGasBandOverlay(cx, cy, radius, planet, now) {
+  if (!(planet.style === "gas" || planet.style === "ice")) return;
+
+  for (let lat = -72; lat <= 72; lat += 6.5) {
+    const band = 0.5 + 0.5 * Math.sin(lat * 0.55 + now * 0.0012);
+    for (let lon = -180; lon <= 180; lon += 4.2) {
+      const rotated = rotateVec(latLonToVec(lat, lon));
+      if (rotated.z <= 0) continue;
+      const x = cx + rotated.x * radius;
+      const y = cy - rotated.y * radius;
+      const alpha = (0.03 + band * 0.07) * rotated.z;
+      ctx.fillStyle = `rgba(255, 250, 240, ${alpha})`;
+      ctx.fillRect(x, y, 1.8, 1.8);
+    }
+  }
+}
+
+function drawRockyCraterOverlay(cx, cy, radius, planet) {
+  if (!(planet.style === "rocky" || planet.style === "mars" || planet.style === "dwarf")) return;
+
+  for (let lat = -78; lat <= 78; lat += 7) {
+    for (let lon = -180; lon <= 180; lon += 7) {
+      if (hash2(lat * 3.1, lon * 1.7) < 0.958) continue;
+      const rotated = rotateVec(latLonToVec(lat, lon));
+      if (rotated.z <= 0) continue;
+
+      const x = cx + rotated.x * radius;
+      const y = cy - rotated.y * radius;
+      const craterR = 0.9 + hash2(lat * 0.8, lon * 0.9) * 2.1;
+      ctx.beginPath();
+      ctx.arc(x, y, craterR, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(44, 36, 34, ${0.25 + rotated.z * 0.25})`;
+      ctx.lineWidth = 0.7;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x - craterR * 0.25, y - craterR * 0.25, craterR * 0.45, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 244, 226, ${0.08 + rotated.z * 0.12})`;
+      ctx.fill();
+    }
+  }
+}
+
+function drawSolarFlares(cx, cy, radius, planet, now) {
+  if (planet.style !== "sun") return;
+
+  ctx.save();
+  for (let i = 0; i < 28; i += 1) {
+    const angle = (i / 28) * Math.PI * 2 + now * 0.00012;
+    const wave = 0.5 + 0.5 * Math.sin(now * 0.002 + i * 0.9);
+    const inner = radius * (1.01 + wave * 0.05);
+    const outer = radius * (1.16 + wave * 0.18);
+    const x1 = cx + Math.cos(angle) * inner;
+    const y1 = cy + Math.sin(angle) * inner;
+    const x2 = cx + Math.cos(angle) * outer;
+    const y2 = cy + Math.sin(angle) * outer;
+    ctx.strokeStyle = `rgba(255, 184, 96, ${0.14 + wave * 0.2})`;
+    ctx.lineWidth = 1 + wave * 1.6;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function drawGlobe() {
   const planet = getCurrentPlanet();
   const width = canvas.clientWidth;
@@ -681,8 +753,9 @@ function drawGlobe() {
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.clip();
 
-  for (let lat = -88; lat <= 88; lat += 2.3) {
-    for (let lon = -180; lon <= 180; lon += 2.3) {
+  const surfaceStep = getSurfaceStep(planet);
+  for (let lat = -88; lat <= 88; lat += surfaceStep) {
+    for (let lon = -180; lon <= 180; lon += surfaceStep) {
       const rotated = rotateVec(latLonToVec(lat, lon));
       if (rotated.z <= 0) continue;
 
@@ -703,6 +776,8 @@ function drawGlobe() {
     }
   }
   drawRingShadowOnPlanet(cx, cy, radius, planet);
+  drawGasBandOverlay(cx, cy, radius, planet, nowMs);
+  drawRockyCraterOverlay(cx, cy, radius, planet);
 
   const withClouds = ["earth", "venus", "jupiter", "saturn", "uranus", "neptune"].includes(state.currentPlanet);
   if (withClouds) {
@@ -800,6 +875,7 @@ function drawGlobe() {
     ctx.arc(cx, cy, radius * 1.9, 0, Math.PI * 2);
     ctx.fill();
   }
+  drawSolarFlares(cx, cy, radius, planet, nowMs);
 
   ctx.beginPath();
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
