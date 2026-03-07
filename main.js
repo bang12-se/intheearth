@@ -190,6 +190,51 @@ const PLANET_PRESETS = {
   }
 };
 
+const PLANET_SATELLITES = {
+  sun: [
+    { name: "Mercury", orbit: 1.4, size: 0.018, speed: 0.00018, phase: 0.1, color: "#b9aba1", incl: 0.12 },
+    { name: "Venus", orbit: 1.62, size: 0.024, speed: 0.00014, phase: 1.2, color: "#dfb07b", incl: 0.07 },
+    { name: "Earth", orbit: 1.88, size: 0.026, speed: 0.00011, phase: 2.2, color: "#7fb9ff", incl: 0.06 },
+    { name: "Mars", orbit: 2.1, size: 0.021, speed: 0.00009, phase: 2.9, color: "#c37b57", incl: 0.11 }
+  ],
+  mercury: [
+    { name: "Bepi", orbit: 1.42, size: 0.02, speed: 0.0018, phase: 0.7, color: "#d4d8df", incl: 0.2 }
+  ],
+  venus: [
+    { name: "Akatsuki", orbit: 1.5, size: 0.021, speed: 0.00155, phase: 1.1, color: "#f2f3ff", incl: 0.16 }
+  ],
+  earth: [
+    { name: "Moon", orbit: 1.58, size: 0.07, speed: 0.0013, phase: 0.4, color: "#d8dde4", incl: 0.18 }
+  ],
+  mars: [
+    { name: "Phobos", orbit: 1.37, size: 0.03, speed: 0.0022, phase: 0.8, color: "#bca58f", incl: 0.16 },
+    { name: "Deimos", orbit: 1.66, size: 0.024, speed: 0.0014, phase: 2.1, color: "#cfb7a2", incl: 0.12 }
+  ],
+  jupiter: [
+    { name: "Io", orbit: 1.46, size: 0.038, speed: 0.0017, phase: 0.2, color: "#f0d58f", incl: 0.09 },
+    { name: "Europa", orbit: 1.64, size: 0.034, speed: 0.00145, phase: 1.3, color: "#d9c8a8", incl: 0.11 },
+    { name: "Ganymede", orbit: 1.86, size: 0.046, speed: 0.00118, phase: 2.3, color: "#b9a792", incl: 0.13 },
+    { name: "Callisto", orbit: 2.08, size: 0.043, speed: 0.00092, phase: 3.1, color: "#8f7f6f", incl: 0.15 }
+  ],
+  saturn: [
+    { name: "Titan", orbit: 1.7, size: 0.05, speed: 0.0011, phase: 0.3, color: "#d9bc8f", incl: 0.1 },
+    { name: "Enceladus", orbit: 1.44, size: 0.027, speed: 0.00185, phase: 1.8, color: "#dce8f3", incl: 0.08 },
+    { name: "Rhea", orbit: 1.92, size: 0.031, speed: 0.0013, phase: 2.7, color: "#c5baa8", incl: 0.12 }
+  ],
+  uranus: [
+    { name: "Titania", orbit: 1.68, size: 0.039, speed: 0.00105, phase: 0.6, color: "#d6ecef", incl: 0.14 },
+    { name: "Oberon", orbit: 1.92, size: 0.036, speed: 0.0009, phase: 2.4, color: "#c2dce0", incl: 0.13 }
+  ],
+  neptune: [
+    { name: "Triton", orbit: 1.64, size: 0.043, speed: 0.0012, phase: 1.5, color: "#d4e5f7", incl: 0.18 }
+  ],
+  pluto: [
+    { name: "Charon", orbit: 1.45, size: 0.06, speed: 0.00125, phase: 0.2, color: "#d8c9be", incl: 0.22 },
+    { name: "Nix", orbit: 1.76, size: 0.025, speed: 0.00095, phase: 1.9, color: "#d9d4cd", incl: 0.18 },
+    { name: "Hydra", orbit: 2.02, size: 0.023, speed: 0.0008, phase: 3.0, color: "#e7e1da", incl: 0.16 }
+  ]
+};
+
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
@@ -718,6 +763,67 @@ function drawSolarFlares(cx, cy, radius, planet, now) {
   ctx.restore();
 }
 
+function getSatelliteStates(planetKey, cx, cy, radius, nowMs) {
+  const satellites = PLANET_SATELLITES[planetKey] || [];
+  const tilt = state.pitch * 0.6;
+  const cp = Math.cos(tilt);
+  const sp = Math.sin(tilt);
+
+  return satellites.map((sat) => {
+    const angle = nowMs * sat.speed + sat.phase + state.yaw * 0.48;
+    const orbitR = radius * sat.orbit;
+    const xOrbit = Math.cos(angle) * orbitR;
+    const zOrbit = Math.sin(angle) * orbitR;
+    const yOrbit = Math.sin(angle * 1.2 + sat.phase) * orbitR * sat.incl;
+    const yRot = yOrbit * cp - zOrbit * sp;
+    const zRot = yOrbit * sp + zOrbit * cp;
+    const size = Math.max(1.8, radius * sat.size * (0.76 + zRot * 0.12));
+
+    return {
+      ...sat,
+      x: cx + xOrbit,
+      y: cy + yRot,
+      z: zRot,
+      orbitR,
+      angle
+    };
+  });
+}
+
+function drawSatelliteOrbits(cx, cy, states) {
+  for (const sat of states) {
+    const alpha = 0.09 + clamp(sat.incl, 0, 0.2) * 0.2;
+    ctx.strokeStyle = `rgba(201, 224, 255, ${alpha})`;
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, sat.orbitR, sat.orbitR * (0.18 + sat.incl * 0.65), sat.angle * 0.15, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function drawSatellites(states, front = true) {
+  for (const sat of states) {
+    if (front && sat.z < 0) continue;
+    if (!front && sat.z >= 0) continue;
+
+    const alpha = front ? 0.95 : 0.45;
+    const glow = ctx.createRadialGradient(sat.x, sat.y, sat.size * 0.2, sat.x, sat.y, sat.size * 2.5);
+    glow.addColorStop(0, `rgba(255, 255, 255, ${0.24 * alpha})`);
+    glow.addColorStop(1, "rgba(255, 255, 255, 0)");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(sat.x, sat.y, sat.size * 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(sat.x, sat.y, sat.size, 0, Math.PI * 2);
+    ctx.fillStyle = sat.color;
+    ctx.globalAlpha = alpha;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
 function drawGlobe() {
   const planet = getCurrentPlanet();
   const width = canvas.clientWidth;
@@ -731,8 +837,11 @@ function drawGlobe() {
     y: 0.32,
     z: Math.sin(now)
   });
+  const satelliteStates = getSatelliteStates(state.currentPlanet, cx, cy, radius, nowMs);
 
   drawSpaceBackground(width, height, nowMs, cx, cy, radius);
+  drawSatelliteOrbits(cx, cy, satelliteStates);
+  drawSatellites(satelliteStates, false);
   drawPlanetRing(cx, cy, radius, planet);
 
   const halo = ctx.createRadialGradient(cx, cy, radius * 0.96, cx, cy, radius * 1.22);
@@ -875,6 +984,7 @@ function drawGlobe() {
     ctx.fill();
   }
   drawSolarFlares(cx, cy, radius, planet, nowMs);
+  drawSatellites(satelliteStates, true);
 
   // Removed outer rim stroke to avoid visible dotted/line artifacts.
 }
