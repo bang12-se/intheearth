@@ -25,6 +25,8 @@ const logEl = document.getElementById("log");
 const nodeListEl = document.getElementById("node-list");
 const canvas = document.getElementById("globe-canvas");
 const ctx = canvas.getContext("2d");
+const rootStyle = document.documentElement.style;
+const stageEl = document.querySelector(".globe-stage");
 
 const dpr = window.devicePixelRatio || 1;
 const state = {
@@ -639,6 +641,32 @@ function handlePointerUp() {
   canvas.classList.remove("dragging");
 }
 
+function initUiParallax() {
+  if (!stageEl || window.matchMedia("(pointer: coarse)").matches) return;
+
+  const applyParallax = (clientX, clientY) => {
+    const rect = stageEl.getBoundingClientRect();
+    const nx = clamp((clientX - rect.left) / rect.width, 0, 1) * 2 - 1;
+    const ny = clamp((clientY - rect.top) / rect.height, 0, 1) * 2 - 1;
+
+    rootStyle.setProperty("--ui-tilt-x", `${(-ny * 2.8).toFixed(2)}deg`);
+    rootStyle.setProperty("--ui-tilt-y", `${(nx * 3.4).toFixed(2)}deg`);
+    rootStyle.setProperty("--ui-shift-x", `${(nx * 8).toFixed(1)}px`);
+    rootStyle.setProperty("--ui-shift-y", `${(ny * 6).toFixed(1)}px`);
+  };
+
+  stageEl.addEventListener("pointermove", (event) => {
+    applyParallax(event.clientX, event.clientY);
+  });
+
+  stageEl.addEventListener("pointerleave", () => {
+    rootStyle.setProperty("--ui-tilt-x", "0deg");
+    rootStyle.setProperty("--ui-tilt-y", "0deg");
+    rootStyle.setProperty("--ui-shift-x", "0px");
+    rootStyle.setProperty("--ui-shift-y", "0px");
+  });
+}
+
 function initEvents() {
   formEl.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -736,6 +764,7 @@ function animate() {
 }
 
 initEvents();
+initUiParallax();
 newRound();
 updateHud();
 updateStatusBar();
