@@ -854,61 +854,6 @@ function drawContinuousPlanetSurface(cx, cy, radius, planet, sun, nowMs) {
   surface.addColorStop(1, `rgb(${Math.max(0, base[0] - 62)}, ${Math.max(0, base[1] - 62)}, ${Math.max(0, base[2] - 62)})`);
   ctx.fillStyle = surface;
   ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
-
-  if (planet.style === "gas" || planet.style === "ice") {
-    for (let i = -6; i <= 6; i += 1) {
-      const bandY = cy + (i / 8) * radius;
-      const wave = Math.sin(nowMs * 0.0012 + i * 1.1) * radius * 0.04;
-      ctx.fillStyle = i % 2 === 0 ? "rgba(255, 242, 220, 0.16)" : "rgba(30, 24, 20, 0.12)";
-      ctx.fillRect(cx - radius, bandY - radius * 0.045 + wave, radius * 2, radius * 0.09);
-    }
-  }
-
-  if (planet.label === "Earth") {
-    for (const blob of CONTINENT_BLOBS) {
-      const c = rotateVec(latLonToVec(blob.lat, blob.lon));
-      if (c.z <= -0.02) continue;
-      const x = cx + c.x * radius;
-      const y = cy - c.y * radius;
-      const rx = (blob.rx / 180) * radius * 1.25 * (0.65 + c.z * 0.4);
-      const ry = (blob.ry / 90) * radius * 0.68 * (0.65 + c.z * 0.4);
-      ctx.fillStyle = "rgba(93, 154, 80, 0.56)";
-      ctx.beginPath();
-      ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.fillStyle = "rgba(220, 236, 242, 0.42)";
-    ctx.beginPath();
-    ctx.ellipse(cx, cy - radius * 0.93, radius * 0.23, radius * 0.11, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(cx, cy + radius * 0.93, radius * 0.25, radius * 0.12, 0, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
-function drawContinuousCloudLayer(cx, cy, radius, planet, nowMs) {
-  if (!["earth", "venus", "jupiter", "saturn", "uranus", "neptune"].includes(state.currentPlanet)) return;
-
-  const cloudColor =
-    planet.label === "Jupiter" || planet.label === "Saturn"
-      ? "245, 220, 194"
-      : planet.label === "Venus"
-      ? "255, 220, 168"
-      : planet.label === "Uranus" || planet.label === "Neptune"
-      ? "220, 241, 255"
-      : "235, 246, 255";
-
-  const layers = planet.label === "Venus" ? 11 : 8;
-  for (let i = -layers; i <= layers; i += 1) {
-    const t = i / layers;
-    const drift = Math.sin(nowMs * 0.00085 + i * 0.9) * radius * 0.06;
-    const y = cy + t * radius * 0.92;
-    const h = radius * (0.035 + (1 - Math.abs(t)) * 0.018);
-    const alpha = 0.08 + (1 - Math.abs(t)) * 0.08;
-    ctx.fillStyle = `rgba(${cloudColor}, ${alpha})`;
-    ctx.fillRect(cx - radius + drift, y - h * 0.5, radius * 2, h);
-  }
 }
 
 function drawGlobe() {
@@ -959,7 +904,6 @@ function drawGlobe() {
   if (!state.lowPerf) {
     drawRingShadowOnPlanet(cx, cy, radius, planet);
   }
-  drawContinuousCloudLayer(cx, cy, radius, planet, nowMs);
 
   const shadow = ctx.createRadialGradient(
     cx + sun.x * radius * -0.35,
