@@ -851,6 +851,26 @@ function drawSatellites(states, front = true) {
   }
 }
 
+function drawEarthDetailedSurfaceLowPerf(cx, cy, radius, sun, nowMs) {
+  const step = 2.2;
+  for (let lat = -88; lat <= 88; lat += step) {
+    for (let lon = -180; lon <= 180; lon += step) {
+      const rotated = rotateVec(latLonToVec(lat, lon));
+      if (rotated.z <= 0) continue;
+
+      const x = cx + rotated.x * radius;
+      const y = cy - rotated.y * radius;
+      const detail = terrainDetail(lat, lon);
+      const light = clamp(dot(rotated, sun) * 0.9 + 0.1, 0.08, 1.02);
+      ctx.fillStyle = getPlanetColor(PLANET_PRESETS.earth, lat, lon, detail, light, nowMs * 0.00001);
+      const size = step * (0.95 + rotated.z * 0.42);
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
 function drawSmoothLowPerfSurface(cx, cy, radius, planet, sun) {
   const base = planet.palette ? planet.palette.a : [86, 128, 176];
   const litX = cx + sun.x * radius * 0.45;
@@ -886,11 +906,14 @@ function drawGlobe() {
     y: 0.32,
     z: Math.sin(now)
   });
+  const allowLowPerfEarthMoon = state.lowPerf && state.currentPlanet === "earth";
   const satelliteStates =
-    state.dragging || state.lowPerf ? [] : getSatelliteStates(state.currentPlanet, cx, cy, radius, nowMs);
+    state.dragging || (state.lowPerf && !allowLowPerfEarthMoon)
+      ? []
+      : getSatelliteStates(state.currentPlanet, cx, cy, radius, nowMs);
 
   drawSpaceBackground(width, height, nowMs, cx, cy, radius);
-  if (!state.dragging && !state.lowPerf) {
+  if (!state.dragging && (!state.lowPerf || allowLowPerfEarthMoon)) {
     drawSatelliteOrbits(cx, cy, satelliteStates);
     drawSatellites(satelliteStates, false);
   }
@@ -915,7 +938,11 @@ function drawGlobe() {
   ctx.clip();
 
   if (state.lowPerf) {
-    drawSmoothLowPerfSurface(cx, cy, radius, planet, sun);
+    if (state.currentPlanet === "earth") {
+      drawEarthDetailedSurfaceLowPerf(cx, cy, radius, sun, nowMs);
+    } else {
+      drawSmoothLowPerfSurface(cx, cy, radius, planet, sun);
+    }
   } else {
     const zoomDetail = clamp((state.zoom - 0.6) / 0.95, 0, 1);
     const dragPenalty = state.dragging ? 0.48 : 0;
@@ -1024,7 +1051,7 @@ function drawGlobe() {
   if (!state.lowPerf) {
     drawSolarFlares(cx, cy, radius, planet, nowMs);
   }
-  if (!state.dragging && !state.lowPerf) {
+  if (!state.dragging && (!state.lowPerf || allowLowPerfEarthMoon)) {
     drawSatellites(satelliteStates, true);
   }
 
