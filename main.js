@@ -38,6 +38,21 @@ const missionSubEl = document.getElementById("mission-sub");
 const viewTargetEl = document.getElementById("view-target");
 
 const dpr = window.devicePixelRatio || 1;
+
+function shouldUseLowPerf() {
+  const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const cores = typeof navigator.hardwareConcurrency === "number" ? navigator.hardwareConcurrency : 4;
+  const memory = typeof navigator.deviceMemory === "number" ? navigator.deviceMemory : null;
+  const smallScreen = window.innerWidth < 860;
+
+  if (reducedMotion) return true;
+  if (coarsePointer && smallScreen && cores <= 4) return true;
+  if (cores <= 2) return true;
+  if (memory !== null && memory <= 2) return true;
+  return false;
+}
+
 const state = {
   score: 0,
   scans: 0,
@@ -62,7 +77,7 @@ const state = {
   starFieldHeight: 0,
   renderScale: dpr,
   lastRenderTs: 0,
-  lowPerf: true,
+  lowPerf: shouldUseLowPerf(),
   currentPlanet: "earth"
 };
 
@@ -249,16 +264,22 @@ function clamp(value, min, max) {
 function getRenderQuality() {
   const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
   const cores = typeof navigator.hardwareConcurrency === "number" ? navigator.hardwareConcurrency : 4;
-  let quality = coarsePointer ? 1 : 1.28;
-  if (cores <= 6) quality -= 0.1;
+  const memory = typeof navigator.deviceMemory === "number" ? navigator.deviceMemory : null;
+  let quality = coarsePointer ? 1.12 : 1.56;
+  if (!coarsePointer && cores >= 10) quality += 0.1;
+  if (memory !== null && memory >= 8) quality += 0.08;
+  if (cores <= 6) quality -= 0.12;
+  if (memory !== null && memory <= 4) quality -= 0.12;
   if (window.innerWidth < 900) quality -= 0.1;
-  return clamp(quality, 1, 1.4);
+  if (!coarsePointer && window.innerWidth > 1400) quality += 0.08;
+  return clamp(quality, 1, 2.25);
 }
 
 function setupCanvasSize() {
   const rect = canvas.getBoundingClientRect();
   const cssWidth = Math.max(260, Math.round(rect.width));
   const cssHeight = Math.max(260, Math.round(rect.height || rect.width));
+  state.lowPerf = shouldUseLowPerf();
   const targetScale = dpr * getRenderQuality();
   state.renderScale = targetScale;
 
@@ -856,8 +877,58 @@ function drawContinuousPlanetSurface(cx, cy, radius, planet, sun, nowMs) {
   ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
 }
 
+function getEarthTextureSettings() {
+  if (state.dragging) {
+    return { latStep: 2.8, lonStep: 2.8, pointSize: 1.7, cloudStep: 4.8 };
+  }
+  if (state.lowPerf) {
+    return { latStep: 1.9, lonStep: 1.9, pointSize: 1.35, cloudStep: 3.2 };
+  }
+  return { latStep: 0.85, lonStep: 0.85, pointSize: 0.82, cloudStep: 1.6 };
+}
+
+function drawEarthTexture(cx, cy, radius, sun, nowMs) {
+  const planet = PLANET_PRESETS.earth;
+  const now = nowMs * 0.00008;
+  const settings = getEarthTextureSettings();
+
+  for (let lat = -90; lat <= 90; lat += settings.latStep) {
+    for (let lon = -180; lon <= 180; lon += settings.lonStep) {
+      const rotated = rotateVec(latLonToVec(lat, lon));
+      if (rotated.z <= 0) continue;
+
+      const light = clamp(dot(rotated, sun) * 0.88 + 0.22, 0.08, 1.06);
+      const detail = terrainDetail(lat, lon);
+      ctx.fillStyle = getPlanetColor(planet, lat, lon, detail, light, now);
+
+      const x = cx + rotated.x * radius;
+      const y = cy - rotated.y * radius;
+      const size = settings.pointSize * (0.7 + rotated.z * 0.8);
+      ctx.fillRect(x - size * 0.5, y - size * 0.5, size, size);
+    }
+  }
+
+  for (let lat = -78; lat <= 78; lat += settings.cloudStep) {
+    for (let lon = -180; lon <= 180; lon += settings.cloudStep * 1.25) {
+      const shiftedLon = lon + state.cloudShift * 140;
+      const cloud = cloudNoise(lat, shiftedLon);
+      if (cloud < 0.18) continue;
+
+      const rotated = rotateVec(latLonToVec(lat, shiftedLon));
+      if (rotated.z <= 0) continue;
+
+      const alpha = clamp((cloud - 0.18) * 0.2, 0.02, 0.16) * (0.45 + rotated.z * 0.7);
+      const x = cx + rotated.x * radius;
+      const y = cy - rotated.y * radius;
+      const s = settings.pointSize * 1.25;
+      ctx.fillStyle = `rgba(238, 248, 255, ${alpha})`;
+      ctx.fillRect(x - s * 0.5, y - s * 0.5, s, s);
+    }
+  }
+}
+
 function drawEarthContinents(cx, cy, radius, nowMs) {
-  const segments = state.lowPerf ? 34 : 72;
+  const segments = state.lowPerf ? 72 : 130;
   for (const blob of CONTINENT_BLOBS) {
     const p = rotateVec(latLonToVec(blob.lat, blob.lon));
     if (p.z <= -0.04) continue;
@@ -881,10 +952,10 @@ function drawEarthContinents(cx, cy, radius, nowMs) {
       else ctx.lineTo(px, py);
     }
     ctx.closePath();
-    ctx.fillStyle = `rgba(82, 142, 75, ${0.46 + p.z * 0.18})`;
+    ctx.fillStyle = `rgba(82, 142, 75, ${0.26 + p.z * 0.14})`;
     ctx.fill();
 
-    ctx.strokeStyle = `rgba(133, 188, 116, ${0.24 + p.z * 0.16})`;
+    ctx.strokeStyle = `rgba(133, 188, 116, ${0.16 + p.z * 0.12})`;
     ctx.lineWidth = state.lowPerf ? 0.75 : 1.05;
     ctx.stroke();
   }
@@ -954,6 +1025,7 @@ function drawGlobe() {
 
   drawContinuousPlanetSurface(cx, cy, radius, planet, sun, nowMs);
   if (state.currentPlanet === "earth") {
+    drawEarthTexture(cx, cy, radius, sun, nowMs);
     drawEarthContinents(cx, cy, radius, nowMs);
   }
   if (!state.lowPerf) {
