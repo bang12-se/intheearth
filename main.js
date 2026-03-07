@@ -61,6 +61,7 @@ const state = {
   starFieldWidth: 0,
   starFieldHeight: 0,
   renderScale: dpr,
+  lastRenderTs: 0,
   currentPlanet: "earth"
 };
 
@@ -862,11 +863,13 @@ function drawGlobe() {
     y: 0.32,
     z: Math.sin(now)
   });
-  const satelliteStates = getSatelliteStates(state.currentPlanet, cx, cy, radius, nowMs);
+  const satelliteStates = state.dragging ? [] : getSatelliteStates(state.currentPlanet, cx, cy, radius, nowMs);
 
   drawSpaceBackground(width, height, nowMs, cx, cy, radius);
-  drawSatelliteOrbits(cx, cy, satelliteStates);
-  drawSatellites(satelliteStates, false);
+  if (!state.dragging) {
+    drawSatelliteOrbits(cx, cy, satelliteStates);
+    drawSatellites(satelliteStates, false);
+  }
   drawPlanetRing(cx, cy, radius, planet);
 
   const halo = ctx.createRadialGradient(cx, cy, radius * 0.96, cx, cy, radius * 1.22);
@@ -888,7 +891,7 @@ function drawGlobe() {
   ctx.clip();
 
   const zoomDetail = clamp((state.zoom - 0.6) / 0.95, 0, 1);
-  const dragPenalty = state.dragging ? 0.22 : 0;
+  const dragPenalty = state.dragging ? 0.48 : 0;
   const surfaceStep = getSurfaceStep(planet) * (1 - zoomDetail * 0.22 + dragPenalty);
   for (let lat = -88; lat <= 88; lat += surfaceStep) {
     for (let lon = -180; lon <= 180; lon += surfaceStep) {
@@ -916,7 +919,7 @@ function drawGlobe() {
   if (withClouds) {
     const cloudDrift = state.cloudShift * 20;
     const cloudDensity = planet.label === "Venus" ? 1.15 : 1;
-    const cloudStep = 3.8 - zoomDetail * 0.45 + (state.dragging ? 0.35 : 0);
+    const cloudStep = 4.2 - zoomDetail * 0.35 + (state.dragging ? 0.8 : 0);
     for (let lat = -85; lat <= 85; lat += cloudStep) {
       for (let lon = -180; lon <= 180; lon += cloudStep) {
         const mapLon = lon + cloudDrift;
@@ -993,7 +996,9 @@ function drawGlobe() {
     ctx.fill();
   }
   drawSolarFlares(cx, cy, radius, planet, nowMs);
-  drawSatellites(satelliteStates, true);
+  if (!state.dragging) {
+    drawSatellites(satelliteStates, true);
+  }
 
   // Removed outer rim stroke to avoid visible dotted/line artifacts.
 }
@@ -1154,7 +1159,6 @@ function handlePointerMove(event) {
       state.yaw -= dx * 0.007;
       state.pitch = clamp(state.pitch + dy * 0.005, -1.2, 1.2);
     }
-    drawGlobe();
   }
   updateHoverCoordinate(event.clientX, event.clientY);
 }
@@ -1321,6 +1325,13 @@ function initEvents() {
 }
 
 function animate() {
+  const now = performance.now();
+  if (now - state.lastRenderTs < 33) {
+    requestAnimationFrame(animate);
+    return;
+  }
+  state.lastRenderTs = now;
+
   const planet = getCurrentPlanet();
   if (!state.dragging) {
     state.yaw += planet.spinSpeed;
