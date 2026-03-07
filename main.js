@@ -1195,7 +1195,6 @@ function animate() {
 }
 
 initEvents();
-initUiParallax();
 setPlanet(state.currentPlanet, true);
 newRound();
 updateHud();
