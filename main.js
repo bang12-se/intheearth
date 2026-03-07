@@ -856,6 +856,58 @@ function drawContinuousPlanetSurface(cx, cy, radius, planet, sun, nowMs) {
   ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
 }
 
+function drawEarthContinents(cx, cy, radius, nowMs) {
+  const segments = state.lowPerf ? 34 : 72;
+  for (const blob of CONTINENT_BLOBS) {
+    const p = rotateVec(latLonToVec(blob.lat, blob.lon));
+    if (p.z <= -0.04) continue;
+
+    const x = cx + p.x * radius;
+    const y = cy - p.y * radius;
+    const vis = 0.6 + p.z * 0.42;
+    const rx = (blob.rx / 180) * radius * 1.2 * vis;
+    const ry = (blob.ry / 90) * radius * 0.72 * vis;
+
+    ctx.beginPath();
+    for (let i = 0; i <= segments; i += 1) {
+      const t = (i / segments) * Math.PI * 2;
+      const n =
+        Math.sin(t * 2.7 + blob.lon * 0.04 + nowMs * 0.00006) * 0.09 +
+        Math.cos(t * 5.1 + blob.lat * 0.05) * 0.06 +
+        Math.sin(t * 8.3 + blob.rx * 0.08) * 0.03;
+      const px = x + Math.cos(t) * rx * (1 + n);
+      const py = y + Math.sin(t) * ry * (1 + n * 0.7);
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = `rgba(82, 142, 75, ${0.46 + p.z * 0.18})`;
+    ctx.fill();
+
+    ctx.strokeStyle = `rgba(133, 188, 116, ${0.24 + p.z * 0.16})`;
+    ctx.lineWidth = state.lowPerf ? 0.75 : 1.05;
+    ctx.stroke();
+  }
+
+  // Polar ice caps
+  ctx.fillStyle = "rgba(228, 243, 252, 0.45)";
+  ctx.beginPath();
+  ctx.ellipse(cx, cy - radius * 0.91, radius * 0.23, radius * 0.12, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + radius * 0.91, radius * 0.27, radius * 0.13, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "rgba(245, 252, 255, 0.58)";
+  ctx.lineWidth = state.lowPerf ? 0.85 : 1.2;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy - radius * 0.91, radius * 0.23, radius * 0.12, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + radius * 0.91, radius * 0.27, radius * 0.13, 0, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
 function drawGlobe() {
   const planet = getCurrentPlanet();
   const width = canvas.clientWidth;
@@ -901,6 +953,9 @@ function drawGlobe() {
   ctx.clip();
 
   drawContinuousPlanetSurface(cx, cy, radius, planet, sun, nowMs);
+  if (state.currentPlanet === "earth") {
+    drawEarthContinents(cx, cy, radius, nowMs);
+  }
   if (!state.lowPerf) {
     drawRingShadowOnPlanet(cx, cy, radius, planet);
   }
