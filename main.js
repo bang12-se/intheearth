@@ -12,6 +12,7 @@ const fireBtn = document.getElementById("fire-btn");
 const scanBtn = document.getElementById("scan-btn");
 const zoomInBtn = document.getElementById("zoom-in");
 const zoomOutBtn = document.getElementById("zoom-out");
+const dragModeBtn = document.getElementById("drag-mode");
 const tiltUpBtn = document.getElementById("tilt-up");
 const tiltDownBtn = document.getElementById("tilt-down");
 const compassBtn = document.getElementById("compass-btn");
@@ -46,8 +47,11 @@ const state = {
   cooldownUntil: 0,
   yaw: -0.5,
   pitch: -0.58,
+  bgYaw: 0,
+  bgPitch: 0,
   zoom: 0.9,
   dragging: false,
+  dragMode: "planet",
   lastX: 0,
   lastY: 0,
   cloudShift: 0,
@@ -371,8 +375,8 @@ function getViewRadius(width, height) {
 }
 
 function drawSpaceBackground(width, height, now, cx, cy, radius) {
-  const driftX = state.yaw * 120;
-  const driftY = state.pitch * 95;
+  const driftX = state.bgYaw * 120;
+  const driftY = state.bgPitch * 95;
 
   const bg = ctx.createLinearGradient(0, 0, 0, height);
   bg.addColorStop(0, "#03070e");
@@ -1147,8 +1151,13 @@ function handlePointerMove(event) {
     state.lastX = event.clientX;
     state.lastY = event.clientY;
 
-    state.yaw -= dx * 0.007;
-    state.pitch = clamp(state.pitch + dy * 0.005, -1.2, 1.2);
+    if (state.dragMode === "space") {
+      state.bgYaw -= dx * 0.007;
+      state.bgPitch = clamp(state.bgPitch + dy * 0.005, -1.2, 1.2);
+    } else {
+      state.yaw -= dx * 0.007;
+      state.pitch = clamp(state.pitch + dy * 0.005, -1.2, 1.2);
+    }
     drawGlobe();
   }
   updateHoverCoordinate(event.clientX, event.clientY);
@@ -1157,6 +1166,15 @@ function handlePointerMove(event) {
 function handlePointerUp() {
   state.dragging = false;
   canvas.classList.remove("dragging");
+}
+
+function setDragMode(mode) {
+  state.dragMode = mode === "space" ? "space" : "planet";
+  if (dragModeBtn) {
+    dragModeBtn.textContent = state.dragMode === "space" ? "S" : "P";
+    dragModeBtn.classList.toggle("active", state.dragMode === "space");
+    dragModeBtn.setAttribute("aria-label", state.dragMode === "space" ? "Drag mode: space" : "Drag mode: planet");
+  }
 }
 
 function applyUiDepth(nx, ny) {
@@ -1255,6 +1273,12 @@ function initEvents() {
     drawGlobe();
   });
 
+  dragModeBtn.addEventListener("click", () => {
+    const nextMode = state.dragMode === "planet" ? "space" : "planet";
+    setDragMode(nextMode);
+    addLog(nextMode === "space" ? "드래그 모드: 우주 배경" : "드래그 모드: 행성");
+  });
+
   tiltUpBtn.addEventListener("click", () => {
     state.pitch = clamp(state.pitch - 0.08, -1.25, 1.25);
     updateStatusBar();
@@ -1276,6 +1300,8 @@ function initEvents() {
   resetViewBtn.addEventListener("click", () => {
     state.yaw = -0.5;
     state.pitch = -0.58;
+    state.bgYaw = 0;
+    state.bgPitch = 0;
     setZoom(0.9);
     updateStatusBar();
     drawGlobe();
@@ -1309,6 +1335,7 @@ function animate() {
 }
 
 initEvents();
+setDragMode(state.dragMode);
 setPlanet(state.currentPlanet, true);
 newRound();
 updateHud();

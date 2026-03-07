@@ -306,6 +306,11 @@ button:disabled {
   box-shadow: 0 9px 20px rgba(2, 10, 18, 0.5);
 }
 
+.map-tools button.active {
+  border-color: #74daff;
+  box-shadow: 0 0 0 1px rgba(116, 218, 255, 0.42), 0 9px 20px rgba(2, 10, 18, 0.5);
+}
+
 #compass-btn {
   width: 52px;
   height: 52px;
