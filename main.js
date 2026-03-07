@@ -249,10 +249,10 @@ function clamp(value, min, max) {
 function getRenderQuality() {
   const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
   const cores = typeof navigator.hardwareConcurrency === "number" ? navigator.hardwareConcurrency : 4;
-  let quality = coarsePointer ? 1 : 1.1;
+  let quality = coarsePointer ? 1 : 1.28;
   if (cores <= 6) quality -= 0.1;
   if (window.innerWidth < 900) quality -= 0.1;
-  return clamp(quality, 0.85, 1.12);
+  return clamp(quality, 1, 1.4);
 }
 
 function setupCanvasSize() {
@@ -718,13 +718,6 @@ function getPlanetRimColor(planet) {
   return "rgba(170, 228, 255, 0.6)";
 }
 
-function getSurfaceStep(planet) {
-  if (planet.style === "sun") return 1.5;
-  if (planet.style === "gas" || planet.style === "ice") return 1.6;
-  if (planet.label === "Mercury" || planet.label === "Mars" || planet.label === "Pluto") return 1.7;
-  return 1.75;
-}
-
 function drawGasBandOverlay(cx, cy, radius, planet, now) {
   if (!(planet.style === "gas" || planet.style === "ice")) return;
 
@@ -851,45 +844,70 @@ function drawSatellites(states, front = true) {
   }
 }
 
-function drawEarthDetailedSurfaceLowPerf(cx, cy, radius, sun, nowMs) {
-  const step = 2.2;
-  for (let lat = -88; lat <= 88; lat += step) {
-    for (let lon = -180; lon <= 180; lon += step) {
-      const rotated = rotateVec(latLonToVec(lat, lon));
-      if (rotated.z <= 0) continue;
-
-      const x = cx + rotated.x * radius;
-      const y = cy - rotated.y * radius;
-      const detail = terrainDetail(lat, lon);
-      const light = clamp(dot(rotated, sun) * 0.9 + 0.1, 0.08, 1.02);
-      ctx.fillStyle = getPlanetColor(PLANET_PRESETS.earth, lat, lon, detail, light, nowMs * 0.00001);
-      const size = step * (0.95 + rotated.z * 0.42);
-      ctx.beginPath();
-      ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-}
-
-function drawSmoothLowPerfSurface(cx, cy, radius, planet, sun) {
+function drawContinuousPlanetSurface(cx, cy, radius, planet, sun, nowMs) {
   const base = planet.palette ? planet.palette.a : [86, 128, 176];
   const litX = cx + sun.x * radius * 0.45;
   const litY = cy - sun.y * radius * 0.38;
-  const shade = ctx.createRadialGradient(litX, litY, radius * 0.08, cx, cy, radius * 1.08);
-  shade.addColorStop(0, `rgb(${Math.min(255, base[0] + 45)}, ${Math.min(255, base[1] + 45)}, ${Math.min(255, base[2] + 45)})`);
-  shade.addColorStop(0.6, `rgb(${base[0]}, ${base[1]}, ${base[2]})`);
-  shade.addColorStop(1, `rgb(${Math.max(0, base[0] - 56)}, ${Math.max(0, base[1] - 56)}, ${Math.max(0, base[2] - 56)})`);
-  ctx.fillStyle = shade;
+  const surface = ctx.createRadialGradient(litX, litY, radius * 0.07, cx, cy, radius * 1.08);
+  surface.addColorStop(0, `rgb(${Math.min(255, base[0] + 54)}, ${Math.min(255, base[1] + 54)}, ${Math.min(255, base[2] + 54)})`);
+  surface.addColorStop(0.62, `rgb(${base[0]}, ${base[1]}, ${base[2]})`);
+  surface.addColorStop(1, `rgb(${Math.max(0, base[0] - 62)}, ${Math.max(0, base[1] - 62)}, ${Math.max(0, base[2] - 62)})`);
+  ctx.fillStyle = surface;
   ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
 
   if (planet.style === "gas" || planet.style === "ice") {
-    ctx.globalAlpha = 0.16;
-    for (let i = -4; i <= 4; i += 1) {
-      const y = cy + (i / 6) * radius;
-      ctx.fillStyle = i % 2 === 0 ? "rgba(255, 240, 220, 0.25)" : "rgba(40, 35, 30, 0.18)";
-      ctx.fillRect(cx - radius, y - radius * 0.055, radius * 2, radius * 0.11);
+    for (let i = -6; i <= 6; i += 1) {
+      const bandY = cy + (i / 8) * radius;
+      const wave = Math.sin(nowMs * 0.0012 + i * 1.1) * radius * 0.04;
+      ctx.fillStyle = i % 2 === 0 ? "rgba(255, 242, 220, 0.16)" : "rgba(30, 24, 20, 0.12)";
+      ctx.fillRect(cx - radius, bandY - radius * 0.045 + wave, radius * 2, radius * 0.09);
     }
-    ctx.globalAlpha = 1;
+  }
+
+  if (planet.label === "Earth") {
+    for (const blob of CONTINENT_BLOBS) {
+      const c = rotateVec(latLonToVec(blob.lat, blob.lon));
+      if (c.z <= -0.02) continue;
+      const x = cx + c.x * radius;
+      const y = cy - c.y * radius;
+      const rx = (blob.rx / 180) * radius * 1.25 * (0.65 + c.z * 0.4);
+      const ry = (blob.ry / 90) * radius * 0.68 * (0.65 + c.z * 0.4);
+      ctx.fillStyle = "rgba(93, 154, 80, 0.56)";
+      ctx.beginPath();
+      ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = "rgba(220, 236, 242, 0.42)";
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - radius * 0.93, radius * 0.23, radius * 0.11, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + radius * 0.93, radius * 0.25, radius * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawContinuousCloudLayer(cx, cy, radius, planet, nowMs) {
+  if (!["earth", "venus", "jupiter", "saturn", "uranus", "neptune"].includes(state.currentPlanet)) return;
+
+  const cloudColor =
+    planet.label === "Jupiter" || planet.label === "Saturn"
+      ? "245, 220, 194"
+      : planet.label === "Venus"
+      ? "255, 220, 168"
+      : planet.label === "Uranus" || planet.label === "Neptune"
+      ? "220, 241, 255"
+      : "235, 246, 255";
+
+  const layers = planet.label === "Venus" ? 11 : 8;
+  for (let i = -layers; i <= layers; i += 1) {
+    const t = i / layers;
+    const drift = Math.sin(nowMs * 0.00085 + i * 0.9) * radius * 0.06;
+    const y = cy + t * radius * 0.92;
+    const h = radius * (0.035 + (1 - Math.abs(t)) * 0.018);
+    const alpha = 0.08 + (1 - Math.abs(t)) * 0.08;
+    ctx.fillStyle = `rgba(${cloudColor}, ${alpha})`;
+    ctx.fillRect(cx - radius + drift, y - h * 0.5, radius * 2, h);
   }
 }
 
@@ -937,69 +955,11 @@ function drawGlobe() {
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.clip();
 
-  if (state.lowPerf) {
-    if (state.currentPlanet === "earth") {
-      drawEarthDetailedSurfaceLowPerf(cx, cy, radius, sun, nowMs);
-    } else {
-      drawSmoothLowPerfSurface(cx, cy, radius, planet, sun);
-    }
-  } else {
-    const zoomDetail = clamp((state.zoom - 0.6) / 0.95, 0, 1);
-    const dragPenalty = state.dragging ? 0.48 : 0;
-    const surfaceStep = getSurfaceStep(planet) * (1 - zoomDetail * 0.22 + dragPenalty);
-    for (let lat = -88; lat <= 88; lat += surfaceStep) {
-      for (let lon = -180; lon <= 180; lon += surfaceStep) {
-        const rotated = rotateVec(latLonToVec(lat, lon));
-        if (rotated.z <= 0) continue;
-
-        const x = cx + rotated.x * radius;
-        const y = cy - rotated.y * radius;
-
-        const detail = terrainDetail(lat, lon);
-        const light = clamp(dot(rotated, sun) * 0.92 + 0.08, 0.05, 1.04);
-        ctx.fillStyle = getPlanetColor(planet, lat, lon, detail, light, nowMs * 0.00001);
-        const size = surfaceStep * (1.15 + rotated.z * 0.42);
-        ctx.beginPath();
-        ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
+  drawContinuousPlanetSurface(cx, cy, radius, planet, sun, nowMs);
+  if (!state.lowPerf) {
     drawRingShadowOnPlanet(cx, cy, radius, planet);
-    const withClouds = ["earth", "venus", "jupiter", "saturn", "uranus", "neptune"].includes(state.currentPlanet);
-    const cloudDrift = state.cloudShift * 20;
-    const cloudDensity = planet.label === "Venus" ? 1.15 : 1;
-    const cloudStep = 4.2 - zoomDetail * 0.35 + (state.dragging ? 0.8 : 0);
-    if (withClouds) {
-      for (let lat = -85; lat <= 85; lat += cloudStep) {
-        for (let lon = -180; lon <= 180; lon += cloudStep) {
-          const mapLon = lon + cloudDrift;
-          const c = cloudNoise(lat, mapLon);
-          if (c < 0.36) continue;
-
-          const rotated = rotateVec(latLonToVec(lat, lon));
-          if (rotated.z <= 0) continue;
-
-          const x = cx + rotated.x * radius;
-          const y = cy - rotated.y * radius;
-          const light = clamp(dot(rotated, sun) * 0.75 + 0.2, 0.12, 1);
-          const alpha = clamp((c - 0.36) * 0.8, 0.05, 0.24) * light * cloudDensity;
-          const cloudColor =
-            planet.label === "Jupiter" || planet.label === "Saturn"
-              ? "245, 220, 194"
-              : planet.label === "Venus"
-              ? "255, 220, 168"
-              : planet.label === "Uranus" || planet.label === "Neptune"
-              ? "220, 241, 255"
-              : "235, 246, 255";
-          ctx.fillStyle = `rgba(${cloudColor}, ${alpha})`;
-          const size = 1.55 + rotated.z * 1.1;
-          ctx.beginPath();
-          ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-    }
   }
+  drawContinuousCloudLayer(cx, cy, radius, planet, nowMs);
 
   const shadow = ctx.createRadialGradient(
     cx + sun.x * radius * -0.35,
