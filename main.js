@@ -892,11 +892,7 @@ function drawGlobe() {
       ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
       ctx.fill();
 
-      const nightFactor = clamp(0.36 - dot(rotated, sun), 0, 0.36) / 0.36;
-      if (planet.style === "earth" && nightFactor > 0.65 && detail.isLand && !detail.polar && hash2(lat, lon) > 0.964) {
-        ctx.fillStyle = `rgba(255, 206, 117, ${0.22 + nightFactor * 0.5})`;
-        ctx.fillRect(x, y, 1.5, 1.5);
-      }
+      // Intentionally removed night-light dots for a cleaner planetary surface.
     }
   }
   drawRingShadowOnPlanet(cx, cy, radius, planet);
@@ -951,26 +947,7 @@ function drawGlobe() {
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.fill();
 
-  state.nodes.forEach((node) => {
-    const p = rotateVec(latLonToVec(node.lat, node.lon));
-    if (p.z <= 0) return;
-
-    const x = cx + p.x * radius;
-    const y = cy - p.y * radius;
-    const size = node.detected ? 4.6 : 3.2;
-
-    ctx.beginPath();
-    ctx.arc(x, y, size, 0, Math.PI * 2);
-    ctx.fillStyle = node.detected ? planet.marker : "#cdeeff";
-    ctx.fill();
-
-    if (node.detected) {
-      ctx.beginPath();
-      ctx.arc(x, y, 10.5, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(186, 227, 255, 0.46)";
-      ctx.stroke();
-    }
-  });
+  // Node point markers are hidden to avoid dotted artifacts on the planet surface.
 
   ctx.restore();
 
