@@ -605,6 +605,26 @@ function drawPlanetRing(cx, cy, radius, planet) {
   ctx.restore();
 }
 
+function drawRingShadowOnPlanet(cx, cy, radius, planet) {
+  if (!planet.ring) return;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.clip();
+
+  ctx.translate(cx, cy);
+  ctx.rotate(state.yaw * 0.24);
+  ctx.scale(1, 0.45 + Math.cos(state.pitch) * 0.12);
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 1.02, 0, Math.PI * 2);
+  ctx.lineWidth = radius * 0.28;
+  ctx.strokeStyle = "rgba(7, 12, 20, 0.28)";
+  ctx.stroke();
+
+  ctx.restore();
+}
+
 function drawAtmosphere(cx, cy, radius, planet) {
   const glow = ctx.createRadialGradient(cx, cy, radius * 0.96, cx, cy, radius * 1.19);
   glow.addColorStop(0, "rgba(255, 255, 255, 0)");
@@ -614,6 +634,16 @@ function drawAtmosphere(cx, cy, radius, planet) {
   ctx.beginPath();
   ctx.arc(cx, cy, radius * 1.19, 0, Math.PI * 2);
   ctx.fill();
+}
+
+function getPlanetRimColor(planet) {
+  if (planet.style === "sun") return "rgba(255, 178, 102, 0.75)";
+  if (planet.label === "Mars") return "rgba(255, 169, 133, 0.66)";
+  if (planet.label === "Jupiter") return "rgba(245, 212, 176, 0.66)";
+  if (planet.label === "Saturn") return "rgba(248, 226, 185, 0.7)";
+  if (planet.label === "Neptune") return "rgba(158, 191, 255, 0.7)";
+  if (planet.label === "Uranus") return "rgba(172, 239, 245, 0.68)";
+  return "rgba(170, 228, 255, 0.6)";
 }
 
 function drawGlobe() {
@@ -660,7 +690,7 @@ function drawGlobe() {
       const y = cy - rotated.y * radius;
 
       const detail = terrainDetail(lat, lon);
-      const light = clamp(dot(rotated, sun) * 0.85 + 0.15, 0.08, 1);
+      const light = clamp(dot(rotated, sun) * 0.92 + 0.08, 0.05, 1.04);
       ctx.fillStyle = getPlanetColor(planet, lat, lon, detail, light, nowMs * 0.00001);
       const size = 1.35 + rotated.z * 1.05;
       ctx.fillRect(x, y, size, size);
@@ -672,6 +702,7 @@ function drawGlobe() {
       }
     }
   }
+  drawRingShadowOnPlanet(cx, cy, radius, planet);
 
   const withClouds = ["earth", "venus", "jupiter", "saturn", "uranus", "neptune"].includes(state.currentPlanet);
   if (withClouds) {
@@ -690,7 +721,15 @@ function drawGlobe() {
         const y = cy - rotated.y * radius;
         const light = clamp(dot(rotated, sun) * 0.75 + 0.2, 0.12, 1);
         const alpha = clamp((c - 0.36) * 0.8, 0.05, 0.24) * light * cloudDensity;
-        ctx.fillStyle = `rgba(235, 246, 255, ${alpha})`;
+        const cloudColor =
+          planet.label === "Jupiter" || planet.label === "Saturn"
+            ? "245, 220, 194"
+            : planet.label === "Venus"
+            ? "255, 220, 168"
+            : planet.label === "Uranus" || planet.label === "Neptune"
+            ? "220, 241, 255"
+            : "235, 246, 255";
+        ctx.fillStyle = `rgba(${cloudColor}, ${alpha})`;
         const size = 1.8 + rotated.z * 1.25;
         ctx.fillRect(x, y, size, size);
       }
@@ -764,7 +803,7 @@ function drawGlobe() {
 
   ctx.beginPath();
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-  ctx.strokeStyle = "rgba(170, 228, 255, 0.6)";
+  ctx.strokeStyle = getPlanetRimColor(planet);
   ctx.lineWidth = 1.1;
   ctx.stroke();
 }
