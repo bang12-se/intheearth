@@ -60,6 +60,7 @@ const state = {
   stars: [],
   starFieldWidth: 0,
   starFieldHeight: 0,
+  renderScale: dpr,
   currentPlanet: "earth"
 };
 
@@ -243,14 +244,25 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
+function getRenderQuality() {
+  const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+  const cores = typeof navigator.hardwareConcurrency === "number" ? navigator.hardwareConcurrency : 4;
+  let quality = coarsePointer ? 1.15 : 1.8;
+  if (cores <= 4) quality -= 0.2;
+  if (window.innerWidth < 900) quality -= 0.15;
+  return clamp(quality, 1, 2);
+}
+
 function setupCanvasSize() {
   const rect = canvas.getBoundingClientRect();
   const cssWidth = Math.max(260, Math.round(rect.width));
   const cssHeight = Math.max(260, Math.round(rect.height || rect.width));
+  const targetScale = dpr * getRenderQuality();
+  state.renderScale = targetScale;
 
-  canvas.width = Math.round(cssWidth * dpr);
-  canvas.height = Math.round(cssHeight * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  canvas.width = Math.round(cssWidth * targetScale);
+  canvas.height = Math.round(cssHeight * targetScale);
+  ctx.setTransform(targetScale, 0, 0, targetScale, 0, 0);
 
   if (
     state.starFieldWidth !== cssWidth ||
@@ -705,10 +717,10 @@ function getPlanetRimColor(planet) {
 }
 
 function getSurfaceStep(planet) {
-  if (planet.style === "sun") return 1.45;
-  if (planet.style === "gas" || planet.style === "ice") return 1.5;
-  if (planet.label === "Mercury" || planet.label === "Mars" || planet.label === "Pluto") return 1.55;
-  return 1.6;
+  if (planet.style === "sun") return 1.1;
+  if (planet.style === "gas" || planet.style === "ice") return 1.15;
+  if (planet.label === "Mercury" || planet.label === "Mars" || planet.label === "Pluto") return 1.2;
+  return 1.25;
 }
 
 function drawGasBandOverlay(cx, cy, radius, planet, now) {
@@ -875,7 +887,8 @@ function drawGlobe() {
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.clip();
 
-  const surfaceStep = getSurfaceStep(planet);
+  const zoomDetail = clamp((state.zoom - 0.6) / 0.95, 0, 1);
+  const surfaceStep = getSurfaceStep(planet) * (1 - zoomDetail * 0.34);
   for (let lat = -88; lat <= 88; lat += surfaceStep) {
     for (let lon = -180; lon <= 180; lon += surfaceStep) {
       const rotated = rotateVec(latLonToVec(lat, lon));
@@ -902,8 +915,9 @@ function drawGlobe() {
   if (withClouds) {
     const cloudDrift = state.cloudShift * 20;
     const cloudDensity = planet.label === "Venus" ? 1.15 : 1;
-    for (let lat = -85; lat <= 85; lat += 4.4) {
-      for (let lon = -180; lon <= 180; lon += 4.4) {
+    const cloudStep = 3.1 - zoomDetail * 0.6;
+    for (let lat = -85; lat <= 85; lat += cloudStep) {
+      for (let lon = -180; lon <= 180; lon += cloudStep) {
         const mapLon = lon + cloudDrift;
         const c = cloudNoise(lat, mapLon);
         if (c < 0.36) continue;
