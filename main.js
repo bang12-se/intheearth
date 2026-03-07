@@ -483,8 +483,17 @@ function mixColor(a, b, t) {
   return [mix(a[0], b[0], t), mix(a[1], b[1], t), mix(a[2], b[2], t)];
 }
 
+function terrainNoise(lat, lon, scaleA, scaleB) {
+  return (
+    Math.sin((lon + lat * 0.8) * scaleA) * 0.55 +
+    Math.cos((lon * 1.2 - lat) * scaleB) * 0.35 +
+    Math.sin((lon - lat * 1.7) * (scaleA * 0.62)) * 0.25
+  );
+}
+
 function getPlanetColor(planet, lat, lon, detail, light, now) {
   let base;
+  let reliefBoost = 0;
 
   if (planet.style === "earth") {
     if (detail.polar) {
@@ -500,6 +509,7 @@ function getPlanetColor(planet, lat, lon, detail, light, now) {
         92 + humid * 82 + mountain * 22 - aridBelt * 8 + coastBoost * 16,
         44 + humid * 28 + mountain * 14 - aridBelt * 7
       ];
+      reliefBoost = mountain * 0.16;
     } else {
       const depth = clamp((0.12 - detail.c) * 0.95, 0, 1);
       const shelf = detail.coastness;
@@ -514,27 +524,62 @@ function getPlanetColor(planet, lat, lon, detail, light, now) {
     }
   } else if (planet.style === "gas" || planet.style === "ice") {
     const p = planet.palette;
-    const bands = 0.5 + 0.5 * Math.sin(lat * 0.35 + Math.sin((lon + now * 12000) * 0.04) * 1.5);
-    const vortices = 0.5 + 0.5 * Math.cos((lon * 0.12 + now * 9000) + lat * 0.08);
-    base = mixColor(p.a, p.b, bands * 0.75);
-    base = mixColor(base, p.c, vortices * 0.45);
+    const bands = 0.5 + 0.5 * Math.sin(lat * 0.37 + Math.sin((lon + now * 12000) * 0.045) * 1.65);
+    const vortex = 0.5 + 0.5 * Math.cos((lon * 0.13 + now * 8800) + lat * 0.11);
+    base = mixColor(p.a, p.b, bands * 0.78);
+    base = mixColor(base, p.c, vortex * 0.45);
+
+    if (planet.label === "Jupiter") {
+      const spotDist = Math.hypot((lat + 19) / 12, (lon - 35) / 16);
+      const redSpot = clamp(1 - spotDist, 0, 1);
+      base = mixColor(base, [184, 96, 72], redSpot * 0.85);
+    }
+    if (planet.label === "Neptune") {
+      const darkSpot = clamp(1 - Math.hypot((lat + 24) / 10, (lon + 32) / 14), 0, 1);
+      base = mixColor(base, [30, 55, 124], darkSpot * 0.8);
+    }
   } else if (planet.style === "sun") {
-    const pulse = 0.5 + 0.5 * Math.sin((lon + now * 24000) * 0.07 + lat * 0.18);
-    const flare = 0.5 + 0.5 * Math.cos((lat - now * 15000) * 0.14 + lon * 0.03);
+    const pulse = 0.5 + 0.5 * Math.sin((lon + now * 25000) * 0.078 + lat * 0.19);
+    const flare = 0.5 + 0.5 * Math.cos((lat - now * 15000) * 0.16 + lon * 0.032);
+    const granule = 0.5 + 0.5 * terrainNoise(lat, lon + now * 5000, 0.22, 0.15);
     base = [
-      190 + pulse * 62 + flare * 18,
-      94 + pulse * 74 + flare * 26,
-      28 + pulse * 44
+      190 + pulse * 56 + flare * 22,
+      94 + pulse * 65 + flare * 26,
+      22 + pulse * 44 + granule * 16
     ];
+    reliefBoost = 0.08 + granule * 0.08;
   } else {
     const p = planet.palette;
-    const rough = 0.5 + 0.5 * Math.sin((lon + lat * 1.6) * 0.18);
-    const crater = 0.5 + 0.5 * Math.cos((lon * 0.28 - lat * 0.21) * Math.PI);
+    const rough = 0.5 + 0.5 * terrainNoise(lat, lon, 0.2, 0.14);
+    const crater = 0.5 + 0.5 * Math.cos((lon * 0.31 - lat * 0.26) * Math.PI);
     base = mixColor(p.a, p.b, rough * 0.72);
     base = mixColor(base, p.c, crater * 0.4);
+
+    if (planet.label === "Mars") {
+      const cap = clamp((Math.abs(lat) - 70) / 16, 0, 1);
+      base = mixColor(base, [229, 214, 196], cap * 0.95);
+      const canyon = clamp(1 - Math.abs(lat + 10) / 10, 0, 1) * (0.5 + 0.5 * Math.sin((lon - 40) * 0.13));
+      base = mixColor(base, [126, 61, 40], canyon * 0.45);
+    }
+
+    if (planet.label === "Mercury") {
+      const craterBelt = clamp(0.5 + 0.5 * Math.sin((lon * 0.8 + lat * 1.3) * 0.35), 0, 1);
+      base = mixColor(base, [150, 144, 136], craterBelt * 0.22);
+    }
+
+    if (planet.label === "Pluto") {
+      const heart = clamp(1 - Math.hypot((lat - 20) / 24, (lon + 4) / 26), 0, 1);
+      base = mixColor(base, [236, 224, 210], heart * 0.85);
+    }
+
+    if (planet.label === "Venus") {
+      const haze = 0.5 + 0.5 * Math.sin((lon + now * 6000) * 0.05 + lat * 0.1);
+      base = mixColor(base, [246, 210, 146], haze * 0.32);
+    }
   }
 
-  return `rgb(${Math.round(base[0] * light)}, ${Math.round(base[1] * light)}, ${Math.round(base[2] * light)})`;
+  const lit = clamp(light + reliefBoost, 0.07, 1.12);
+  return `rgb(${Math.round(base[0] * lit)}, ${Math.round(base[1] * lit)}, ${Math.round(base[2] * lit)})`;
 }
 
 function drawPlanetRing(cx, cy, radius, planet) {
@@ -550,10 +595,25 @@ function drawPlanetRing(cx, cy, radius, planet) {
   ctx.beginPath();
   ctx.arc(0, 0, outer, 0, Math.PI * 2);
   ctx.arc(0, 0, inner, 0, Math.PI * 2, true);
-  ctx.fillStyle = planet.ring.color;
+  const ringGrad = ctx.createRadialGradient(0, 0, inner, 0, 0, outer);
+  ringGrad.addColorStop(0, "rgba(255, 255, 255, 0.08)");
+  ringGrad.addColorStop(0.45, planet.ring.color);
+  ringGrad.addColorStop(1, "rgba(52, 42, 31, 0.45)");
+  ctx.fillStyle = ringGrad;
   ctx.fill();
 
   ctx.restore();
+}
+
+function drawAtmosphere(cx, cy, radius, planet) {
+  const glow = ctx.createRadialGradient(cx, cy, radius * 0.96, cx, cy, radius * 1.19);
+  glow.addColorStop(0, "rgba(255, 255, 255, 0)");
+  glow.addColorStop(0.7, planet.halo[0]);
+  glow.addColorStop(1, planet.halo[1]);
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 1.19, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 function drawGlobe() {
@@ -591,8 +651,8 @@ function drawGlobe() {
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.clip();
 
-  for (let lat = -88; lat <= 88; lat += 2.8) {
-    for (let lon = -180; lon <= 180; lon += 2.8) {
+  for (let lat = -88; lat <= 88; lat += 2.3) {
+    for (let lon = -180; lon <= 180; lon += 2.3) {
       const rotated = rotateVec(latLonToVec(lat, lon));
       if (rotated.z <= 0) continue;
 
@@ -616,6 +676,7 @@ function drawGlobe() {
   const withClouds = ["earth", "venus", "jupiter", "saturn", "uranus", "neptune"].includes(state.currentPlanet);
   if (withClouds) {
     const cloudDrift = state.cloudShift * 20;
+    const cloudDensity = planet.label === "Venus" ? 1.15 : 1;
     for (let lat = -85; lat <= 85; lat += 4.4) {
       for (let lon = -180; lon <= 180; lon += 4.4) {
         const mapLon = lon + cloudDrift;
@@ -628,7 +689,7 @@ function drawGlobe() {
         const x = cx + rotated.x * radius;
         const y = cy - rotated.y * radius;
         const light = clamp(dot(rotated, sun) * 0.75 + 0.2, 0.12, 1);
-        const alpha = clamp((c - 0.36) * 0.8, 0.05, 0.24) * light;
+        const alpha = clamp((c - 0.36) * 0.8, 0.05, 0.24) * light * cloudDensity;
         ctx.fillStyle = `rgba(235, 246, 255, ${alpha})`;
         const size = 1.8 + rotated.z * 1.25;
         ctx.fillRect(x, y, size, size);
@@ -688,6 +749,18 @@ function drawGlobe() {
   ctx.beginPath();
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.fill();
+  drawAtmosphere(cx, cy, radius, planet);
+
+  if (planet.style === "sun") {
+    const corona = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 1.9);
+    corona.addColorStop(0, "rgba(255, 205, 124, 0.1)");
+    corona.addColorStop(0.45, "rgba(255, 154, 61, 0.14)");
+    corona.addColorStop(1, "rgba(255, 154, 61, 0)");
+    ctx.fillStyle = corona;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 1.9, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   ctx.beginPath();
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
