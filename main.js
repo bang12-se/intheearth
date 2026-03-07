@@ -663,9 +663,9 @@ function drawGasBandOverlay(cx, cy, radius, planet, now) {
       if (rotated.z <= 0) continue;
       const x = cx + rotated.x * radius;
       const y = cy - rotated.y * radius;
-      const alpha = (0.03 + band * 0.07) * rotated.z;
+      const alpha = (0.02 + band * 0.05) * rotated.z;
       ctx.fillStyle = `rgba(255, 250, 240, ${alpha})`;
-      ctx.fillRect(x, y, 1.8, 1.8);
+      ctx.fillRect(x, y, 1.1, 1.1);
     }
   }
 }
@@ -675,21 +675,21 @@ function drawRockyCraterOverlay(cx, cy, radius, planet) {
 
   for (let lat = -78; lat <= 78; lat += 7) {
     for (let lon = -180; lon <= 180; lon += 7) {
-      if (hash2(lat * 3.1, lon * 1.7) < 0.958) continue;
+      if (hash2(lat * 3.1, lon * 1.7) < 0.985) continue;
       const rotated = rotateVec(latLonToVec(lat, lon));
       if (rotated.z <= 0) continue;
 
       const x = cx + rotated.x * radius;
       const y = cy - rotated.y * radius;
-      const craterR = 0.9 + hash2(lat * 0.8, lon * 0.9) * 2.1;
+      const craterR = 0.7 + hash2(lat * 0.8, lon * 0.9) * 1.2;
       ctx.beginPath();
       ctx.arc(x, y, craterR, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(44, 36, 34, ${0.25 + rotated.z * 0.25})`;
-      ctx.lineWidth = 0.7;
+      ctx.strokeStyle = `rgba(44, 36, 34, ${0.12 + rotated.z * 0.12})`;
+      ctx.lineWidth = 0.45;
       ctx.stroke();
       ctx.beginPath();
       ctx.arc(x - craterR * 0.25, y - craterR * 0.25, craterR * 0.45, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 244, 226, ${0.08 + rotated.z * 0.12})`;
+      ctx.fillStyle = `rgba(255, 244, 226, ${0.04 + rotated.z * 0.08})`;
       ctx.fill();
     }
   }
@@ -776,8 +776,7 @@ function drawGlobe() {
     }
   }
   drawRingShadowOnPlanet(cx, cy, radius, planet);
-  drawGasBandOverlay(cx, cy, radius, planet, nowMs);
-  drawRockyCraterOverlay(cx, cy, radius, planet);
+  // Removed high-contrast dotted overlays for cleaner planetary surfaces.
 
   const withClouds = ["earth", "venus", "jupiter", "saturn", "uranus", "neptune"].includes(state.currentPlanet);
   if (withClouds) {
@@ -877,11 +876,7 @@ function drawGlobe() {
   }
   drawSolarFlares(cx, cy, radius, planet, nowMs);
 
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-  ctx.strokeStyle = getPlanetRimColor(planet);
-  ctx.lineWidth = 1.1;
-  ctx.stroke();
+  // Removed outer rim stroke to avoid visible dotted/line artifacts.
 }
 
 function renderNodeList() {
