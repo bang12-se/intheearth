@@ -247,10 +247,10 @@ function clamp(value, min, max) {
 function getRenderQuality() {
   const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
   const cores = typeof navigator.hardwareConcurrency === "number" ? navigator.hardwareConcurrency : 4;
-  let quality = coarsePointer ? 1.15 : 1.8;
-  if (cores <= 4) quality -= 0.2;
-  if (window.innerWidth < 900) quality -= 0.15;
-  return clamp(quality, 1, 2);
+  let quality = coarsePointer ? 1.05 : 1.3;
+  if (cores <= 4) quality -= 0.15;
+  if (window.innerWidth < 900) quality -= 0.1;
+  return clamp(quality, 1, 1.45);
 }
 
 function setupCanvasSize() {
@@ -717,10 +717,10 @@ function getPlanetRimColor(planet) {
 }
 
 function getSurfaceStep(planet) {
-  if (planet.style === "sun") return 1.1;
-  if (planet.style === "gas" || planet.style === "ice") return 1.15;
-  if (planet.label === "Mercury" || planet.label === "Mars" || planet.label === "Pluto") return 1.2;
-  return 1.25;
+  if (planet.style === "sun") return 1.5;
+  if (planet.style === "gas" || planet.style === "ice") return 1.6;
+  if (planet.label === "Mercury" || planet.label === "Mars" || planet.label === "Pluto") return 1.7;
+  return 1.75;
 }
 
 function drawGasBandOverlay(cx, cy, radius, planet, now) {
@@ -888,7 +888,8 @@ function drawGlobe() {
   ctx.clip();
 
   const zoomDetail = clamp((state.zoom - 0.6) / 0.95, 0, 1);
-  const surfaceStep = getSurfaceStep(planet) * (1 - zoomDetail * 0.34);
+  const dragPenalty = state.dragging ? 0.22 : 0;
+  const surfaceStep = getSurfaceStep(planet) * (1 - zoomDetail * 0.22 + dragPenalty);
   for (let lat = -88; lat <= 88; lat += surfaceStep) {
     for (let lon = -180; lon <= 180; lon += surfaceStep) {
       const rotated = rotateVec(latLonToVec(lat, lon));
@@ -915,7 +916,7 @@ function drawGlobe() {
   if (withClouds) {
     const cloudDrift = state.cloudShift * 20;
     const cloudDensity = planet.label === "Venus" ? 1.15 : 1;
-    const cloudStep = 3.1 - zoomDetail * 0.6;
+    const cloudStep = 3.8 - zoomDetail * 0.45 + (state.dragging ? 0.35 : 0);
     for (let lat = -85; lat <= 85; lat += cloudStep) {
       for (let lon = -180; lon <= 180; lon += cloudStep) {
         const mapLon = lon + cloudDrift;
