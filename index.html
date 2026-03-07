@@ -31,6 +31,18 @@
       <header class="top-bar">
         <div class="brand">Geo Signal Tracker | Space Explorer</div>
         <form id="strike-form" autocomplete="off" class="search-wrap">
+          <select id="planet-select" name="planet" aria-label="Select planet">
+            <option value="sun">Sun</option>
+            <option value="mercury">Mercury</option>
+            <option value="venus">Venus</option>
+            <option value="earth" selected>Earth</option>
+            <option value="mars">Mars</option>
+            <option value="jupiter">Jupiter</option>
+            <option value="saturn">Saturn</option>
+            <option value="uranus">Uranus</option>
+            <option value="neptune">Neptune</option>
+            <option value="pluto">Pluto</option>
+          </select>
           <input id="coord-input" name="coord" type="text" placeholder="좌표 입력: 37.5665, 126.9780" required />
           <button id="fire-btn" type="submit">Scan</button>
         </form>
@@ -38,8 +50,8 @@
 
       <aside class="left-panel panel">
         <p class="eyebrow">Orbital Mode</p>
-        <h1>Earth From Space</h1>
-        <p class="sub">우주에서 지구를 바라보는 탐색 화면입니다. 드래그로 회전하고, 실제 위도/경도로 스캔하세요.</p>
+        <h1 id="mission-title">Earth From Space</h1>
+        <p id="mission-sub" class="sub">우주에서 지구를 바라보는 탐색 화면입니다. 드래그로 회전하고, 실제 위도/경도로 스캔하세요.</p>
 
         <form class="scan-form">
           <button id="scan-btn" class="secondary" type="button">New Sweep</button>
@@ -80,7 +92,7 @@
         <span id="view-heading">Heading ---</span>
         <span id="view-tilt">Tilt ---</span>
         <span id="view-alt">Alt --- km</span>
-        <span>Orbit navigation enabled</span>
+        <span id="view-target">Target Earth</span>
       </footer>
     </section>
 

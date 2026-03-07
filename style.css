@@ -117,7 +117,16 @@ body::after {
   width: min(640px, 70vw);
   display: flex;
   gap: 8px;
+  align-items: center;
   pointer-events: auto;
+}
+
+.search-wrap input {
+  flex: 1 1 auto;
+}
+
+#planet-select {
+  flex: 0 0 150px;
 }
 
 .left-panel {
@@ -229,6 +238,7 @@ h1 {
 }
 
 input,
+select,
 button {
   height: 42px;
   border-radius: 12px;
@@ -242,6 +252,13 @@ input {
   background: var(--glass-strong);
   color: var(--text);
   padding: 0 12px;
+}
+
+select {
+  min-width: 148px;
+  background: var(--glass-strong);
+  color: var(--text);
+  padding: 0 10px;
 }
 
 button {
@@ -394,6 +411,11 @@ button:disabled {
 
   .search-wrap {
     width: 100%;
+    flex-wrap: wrap;
+  }
+
+  #planet-select {
+    flex: 1 1 180px;
   }
 
   .left-panel {

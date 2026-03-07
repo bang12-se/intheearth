@@ -6,6 +6,7 @@ const shotsEl = document.getElementById("shots");
 const hitsEl = document.getElementById("hits");
 const cooldownEl = document.getElementById("cooldown");
 const formEl = document.getElementById("strike-form");
+const planetSelectEl = document.getElementById("planet-select");
 const coordInput = document.getElementById("coord-input");
 const fireBtn = document.getElementById("fire-btn");
 const scanBtn = document.getElementById("scan-btn");
@@ -31,6 +32,9 @@ const leftPanelEl = document.querySelector(".left-panel");
 const mapToolsEl = document.querySelector(".map-tools");
 const statusBarEl = document.querySelector(".status-bar");
 const contentCardEls = Array.from(document.querySelectorAll(".content-card"));
+const missionTitleEl = document.getElementById("mission-title");
+const missionSubEl = document.getElementById("mission-sub");
+const viewTargetEl = document.getElementById("view-target");
 
 const dpr = window.devicePixelRatio || 1;
 const state = {
@@ -51,7 +55,139 @@ const state = {
   hoverLon: null,
   stars: [],
   starFieldWidth: 0,
-  starFieldHeight: 0
+  starFieldHeight: 0,
+  currentPlanet: "earth"
+};
+
+const PLANET_PRESETS = {
+  sun: {
+    label: "Sun",
+    title: "Solar Core Observer",
+    subtitle: "태양 표면 플라즈마 패턴을 관측합니다.",
+    altitudeBase: 696340,
+    spinSpeed: 0.0002,
+    cloudSpeed: 0.0014,
+    style: "sun",
+    halo: ["rgba(255, 197, 102, 0.26)", "rgba(255, 197, 102, 0)"],
+    ring: null,
+    marker: "#ffd58b"
+  },
+  mercury: {
+    label: "Mercury",
+    title: "Mercury Recon Orbit",
+    subtitle: "암석 지형과 충돌 분지를 가상 스캔합니다.",
+    altitudeBase: 2440,
+    spinSpeed: 0.00035,
+    cloudSpeed: 0.00035,
+    style: "rocky",
+    palette: { a: [122, 116, 108], b: [84, 78, 72], c: [146, 135, 122] },
+    halo: ["rgba(196, 190, 178, 0.13)", "rgba(196, 190, 178, 0)"],
+    ring: null,
+    marker: "#cfd0d2"
+  },
+  venus: {
+    label: "Venus",
+    title: "Venus Atmosphere Track",
+    subtitle: "두꺼운 대기층 아래 열 신호를 추적합니다.",
+    altitudeBase: 6052,
+    spinSpeed: 0.00024,
+    cloudSpeed: 0.001,
+    style: "venus",
+    palette: { a: [223, 170, 95], b: [167, 117, 61], c: [238, 201, 134] },
+    halo: ["rgba(255, 197, 128, 0.17)", "rgba(255, 197, 128, 0)"],
+    ring: null,
+    marker: "#ffd597"
+  },
+  earth: {
+    label: "Earth",
+    title: "Earth From Space",
+    subtitle: "우주에서 지구를 바라보는 탐색 화면입니다. 드래그로 회전하고, 실제 위도/경도로 스캔하세요.",
+    altitudeBase: 6371,
+    spinSpeed: 0.00035,
+    cloudSpeed: 0.00065,
+    style: "earth",
+    halo: ["rgba(93, 190, 255, 0.12)", "rgba(93, 190, 255, 0)"],
+    ring: null,
+    marker: "#6df2c8"
+  },
+  mars: {
+    label: "Mars",
+    title: "Mars Surface Sweep",
+    subtitle: "건조한 협곡 지형과 분화구 지대를 탐사합니다.",
+    altitudeBase: 3390,
+    spinSpeed: 0.0004,
+    cloudSpeed: 0.0003,
+    style: "mars",
+    palette: { a: [177, 90, 56], b: [120, 54, 35], c: [212, 126, 84] },
+    halo: ["rgba(219, 124, 85, 0.15)", "rgba(219, 124, 85, 0)"],
+    ring: null,
+    marker: "#ffbf96"
+  },
+  jupiter: {
+    label: "Jupiter",
+    title: "Jupiter Storm Monitor",
+    subtitle: "거대 가스 대기의 밴드와 폭풍 패턴을 관측합니다.",
+    altitudeBase: 69911,
+    spinSpeed: 0.00065,
+    cloudSpeed: 0.001,
+    style: "gas",
+    palette: { a: [215, 173, 132], b: [171, 129, 94], c: [233, 205, 169] },
+    halo: ["rgba(232, 195, 152, 0.14)", "rgba(232, 195, 152, 0)"],
+    ring: null,
+    marker: "#ffe0b1"
+  },
+  saturn: {
+    label: "Saturn",
+    title: "Saturn Ring Station",
+    subtitle: "토성 대기층과 고리 단면을 추적합니다.",
+    altitudeBase: 58232,
+    spinSpeed: 0.00055,
+    cloudSpeed: 0.0009,
+    style: "gas",
+    palette: { a: [226, 200, 150], b: [176, 147, 101], c: [242, 223, 186] },
+    halo: ["rgba(243, 216, 173, 0.16)", "rgba(243, 216, 173, 0)"],
+    ring: { inner: 1.16, outer: 1.52, color: "rgba(236, 206, 152, 0.44)" },
+    marker: "#ffe3b4"
+  },
+  uranus: {
+    label: "Uranus",
+    title: "Uranus Polar Orbit",
+    subtitle: "청록색 상층 대기와 극권 기류를 모니터링합니다.",
+    altitudeBase: 25362,
+    spinSpeed: 0.00043,
+    cloudSpeed: 0.00075,
+    style: "ice",
+    palette: { a: [136, 212, 216], b: [96, 168, 178], c: [182, 232, 233] },
+    halo: ["rgba(164, 223, 230, 0.16)", "rgba(164, 223, 230, 0)"],
+    ring: { inner: 1.14, outer: 1.32, color: "rgba(176, 220, 226, 0.26)" },
+    marker: "#bdf8ff"
+  },
+  neptune: {
+    label: "Neptune",
+    title: "Neptune Deep Blue View",
+    subtitle: "심층 대기 밴드와 고속 바람권을 추적합니다.",
+    altitudeBase: 24622,
+    spinSpeed: 0.00048,
+    cloudSpeed: 0.00085,
+    style: "ice",
+    palette: { a: [77, 117, 218], b: [49, 79, 168], c: [127, 160, 239] },
+    halo: ["rgba(112, 151, 243, 0.17)", "rgba(112, 151, 243, 0)"],
+    ring: null,
+    marker: "#b7d2ff"
+  },
+  pluto: {
+    label: "Pluto",
+    title: "Pluto Dwarf Survey",
+    subtitle: "왜소행성의 얼음 지형과 명암 대비를 스캔합니다.",
+    altitudeBase: 1188,
+    spinSpeed: 0.0003,
+    cloudSpeed: 0.00024,
+    style: "dwarf",
+    palette: { a: [186, 163, 150], b: [125, 107, 98], c: [214, 195, 181] },
+    halo: ["rgba(203, 184, 171, 0.14)", "rgba(203, 184, 171, 0)"],
+    ring: null,
+    marker: "#f0e0d2"
+  }
 };
 
 function clamp(value, min, max) {
@@ -229,6 +365,7 @@ function drawSpaceBackground(width, height, now, cx, cy, radius) {
 }
 
 function updateStatusBar() {
+  const planet = getCurrentPlanet();
   const latText =
     state.hoverLat === null ? "---" : `${state.hoverLat >= 0 ? "N" : "S"} ${Math.abs(state.hoverLat).toFixed(2)}°`;
   const lonText =
@@ -239,11 +376,18 @@ function updateStatusBar() {
   const heading = ((state.yaw * 180) / Math.PI) % 360;
   const headingNormalized = (heading + 360) % 360;
   const tiltDeg = clamp((Math.abs(state.pitch) * 180) / Math.PI, 0, 89);
-  const altitudeKm = 23500 / Math.pow(state.zoom, 1.45);
+  const altitudeKm = (planet.altitudeBase * 4.1) / Math.pow(state.zoom, 1.35);
   viewHeadingEl.textContent = `Heading ${headingNormalized.toFixed(1)}°`;
   viewTiltEl.textContent = `Tilt ${tiltDeg.toFixed(1)}°`;
   viewAltEl.textContent = `Alt ${Math.round(altitudeKm).toLocaleString()} km`;
+  viewTargetEl.textContent = `Target ${planet.label}`;
   compassNeedle.style.setProperty("--heading", `${-headingNormalized}deg`);
+}
+
+function applyPlanetInfo() {
+  const planet = getCurrentPlanet();
+  if (missionTitleEl) missionTitleEl.textContent = planet.title;
+  if (missionSubEl) missionSubEl.textContent = planet.subtitle;
 }
 
 function hash2(a, b) {
@@ -327,7 +471,93 @@ function cloudNoise(lat, lon) {
   return (n1 + n2 + n3) / 2.15;
 }
 
+function getCurrentPlanet() {
+  return PLANET_PRESETS[state.currentPlanet] || PLANET_PRESETS.earth;
+}
+
+function mix(a, b, t) {
+  return a + (b - a) * t;
+}
+
+function mixColor(a, b, t) {
+  return [mix(a[0], b[0], t), mix(a[1], b[1], t), mix(a[2], b[2], t)];
+}
+
+function getPlanetColor(planet, lat, lon, detail, light, now) {
+  let base;
+
+  if (planet.style === "earth") {
+    if (detail.polar) {
+      const iceMix = clamp((Math.abs(lat) - 64) / 24, 0, 1);
+      base = [206 + 33 * iceMix, 224 + 25 * iceMix, 232 + 18 * iceMix];
+    } else if (detail.isLand) {
+      const humid = clamp(1 - Math.abs(lat) / 52, 0, 1);
+      const aridBelt = clamp(1 - Math.abs(Math.abs(lat) - 24) / 10, 0, 1);
+      const mountain = clamp((detail.mountain + 0.4) / 1.4, 0, 1);
+      const coastBoost = detail.coastness * 0.45;
+      base = [
+        55 + humid * 16 + aridBelt * 34 + mountain * 45 + coastBoost * 14,
+        92 + humid * 82 + mountain * 22 - aridBelt * 8 + coastBoost * 16,
+        44 + humid * 28 + mountain * 14 - aridBelt * 7
+      ];
+    } else {
+      const depth = clamp((0.12 - detail.c) * 0.95, 0, 1);
+      const shelf = detail.coastness;
+      base = [
+        8 + shelf * 20 + (1 - depth) * 6,
+        47 + shelf * 58 + (1 - depth) * 26,
+        82 + shelf * 92 + (1 - depth) * 70
+      ];
+      const latBand = 1 - Math.min(1, Math.abs(lat) / 90);
+      base[1] += 14 * latBand;
+      base[2] += 10 * latBand;
+    }
+  } else if (planet.style === "gas" || planet.style === "ice") {
+    const p = planet.palette;
+    const bands = 0.5 + 0.5 * Math.sin(lat * 0.35 + Math.sin((lon + now * 12000) * 0.04) * 1.5);
+    const vortices = 0.5 + 0.5 * Math.cos((lon * 0.12 + now * 9000) + lat * 0.08);
+    base = mixColor(p.a, p.b, bands * 0.75);
+    base = mixColor(base, p.c, vortices * 0.45);
+  } else if (planet.style === "sun") {
+    const pulse = 0.5 + 0.5 * Math.sin((lon + now * 24000) * 0.07 + lat * 0.18);
+    const flare = 0.5 + 0.5 * Math.cos((lat - now * 15000) * 0.14 + lon * 0.03);
+    base = [
+      190 + pulse * 62 + flare * 18,
+      94 + pulse * 74 + flare * 26,
+      28 + pulse * 44
+    ];
+  } else {
+    const p = planet.palette;
+    const rough = 0.5 + 0.5 * Math.sin((lon + lat * 1.6) * 0.18);
+    const crater = 0.5 + 0.5 * Math.cos((lon * 0.28 - lat * 0.21) * Math.PI);
+    base = mixColor(p.a, p.b, rough * 0.72);
+    base = mixColor(base, p.c, crater * 0.4);
+  }
+
+  return `rgb(${Math.round(base[0] * light)}, ${Math.round(base[1] * light)}, ${Math.round(base[2] * light)})`;
+}
+
+function drawPlanetRing(cx, cy, radius, planet) {
+  if (!planet.ring) return;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(state.yaw * 0.24);
+  ctx.scale(1, 0.45 + Math.cos(state.pitch) * 0.12);
+
+  const inner = radius * planet.ring.inner;
+  const outer = radius * planet.ring.outer;
+  ctx.beginPath();
+  ctx.arc(0, 0, outer, 0, Math.PI * 2);
+  ctx.arc(0, 0, inner, 0, Math.PI * 2, true);
+  ctx.fillStyle = planet.ring.color;
+  ctx.fill();
+
+  ctx.restore();
+}
+
 function drawGlobe() {
+  const planet = getCurrentPlanet();
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
   const { cx, cy } = getViewCenter(width, height);
@@ -341,10 +571,11 @@ function drawGlobe() {
   });
 
   drawSpaceBackground(width, height, nowMs, cx, cy, radius);
+  drawPlanetRing(cx, cy, radius, planet);
 
   const halo = ctx.createRadialGradient(cx, cy, radius * 0.96, cx, cy, radius * 1.22);
-  halo.addColorStop(0, "rgba(93, 190, 255, 0.12)");
-  halo.addColorStop(1, "rgba(93, 190, 255, 0)");
+  halo.addColorStop(0, planet.halo[0]);
+  halo.addColorStop(1, planet.halo[1]);
   ctx.fillStyle = halo;
   ctx.beginPath();
   ctx.arc(cx, cy, radius * 1.22, 0, Math.PI * 2);
@@ -369,69 +600,39 @@ function drawGlobe() {
       const y = cy - rotated.y * radius;
 
       const detail = terrainDetail(lat, lon);
-
       const light = clamp(dot(rotated, sun) * 0.85 + 0.15, 0.08, 1);
-      let r;
-      let g;
-      let b;
-
-      if (detail.polar) {
-        const iceMix = clamp((Math.abs(lat) - 64) / 24, 0, 1);
-        r = 206 + 33 * iceMix;
-        g = 224 + 25 * iceMix;
-        b = 232 + 18 * iceMix;
-      } else if (detail.isLand) {
-        const humid = clamp(1 - Math.abs(lat) / 52, 0, 1);
-        const aridBelt = clamp(1 - Math.abs(Math.abs(lat) - 24) / 10, 0, 1);
-        const mountain = clamp((detail.mountain + 0.4) / 1.4, 0, 1);
-        const coastBoost = detail.coastness * 0.45;
-
-        r = 55 + humid * 16 + aridBelt * 34 + mountain * 45 + coastBoost * 14;
-        g = 92 + humid * 82 + mountain * 22 - aridBelt * 8 + coastBoost * 16;
-        b = 44 + humid * 28 + mountain * 14 - aridBelt * 7;
-      } else {
-        const depth = clamp((0.12 - detail.c) * 0.95, 0, 1);
-        const shelf = detail.coastness;
-        r = 8 + shelf * 20 + (1 - depth) * 6;
-        g = 47 + shelf * 58 + (1 - depth) * 26;
-        b = 82 + shelf * 92 + (1 - depth) * 70;
-      }
-
-      if (!detail.polar && !detail.isLand) {
-        const latBand = 1 - Math.min(1, Math.abs(lat) / 90);
-        g += 14 * latBand;
-        b += 10 * latBand;
-      }
-
-      ctx.fillStyle = `rgb(${Math.round(r * light)}, ${Math.round(g * light)}, ${Math.round(b * light)})`;
+      ctx.fillStyle = getPlanetColor(planet, lat, lon, detail, light, nowMs * 0.00001);
       const size = 1.35 + rotated.z * 1.05;
       ctx.fillRect(x, y, size, size);
 
       const nightFactor = clamp(0.36 - dot(rotated, sun), 0, 0.36) / 0.36;
-      if (nightFactor > 0.65 && detail.isLand && !detail.polar && hash2(lat, lon) > 0.964) {
+      if (planet.style === "earth" && nightFactor > 0.65 && detail.isLand && !detail.polar && hash2(lat, lon) > 0.964) {
         ctx.fillStyle = `rgba(255, 206, 117, ${0.22 + nightFactor * 0.5})`;
         ctx.fillRect(x, y, 1.5, 1.5);
       }
     }
   }
 
-  const cloudDrift = state.cloudShift * 20;
-  for (let lat = -85; lat <= 85; lat += 4.4) {
-    for (let lon = -180; lon <= 180; lon += 4.4) {
-      const mapLon = lon + cloudDrift;
-      const c = cloudNoise(lat, mapLon);
-      if (c < 0.36) continue;
+  const withClouds = ["earth", "venus", "jupiter", "saturn", "uranus", "neptune"].includes(state.currentPlanet);
+  if (withClouds) {
+    const cloudDrift = state.cloudShift * 20;
+    for (let lat = -85; lat <= 85; lat += 4.4) {
+      for (let lon = -180; lon <= 180; lon += 4.4) {
+        const mapLon = lon + cloudDrift;
+        const c = cloudNoise(lat, mapLon);
+        if (c < 0.36) continue;
 
-      const rotated = rotateVec(latLonToVec(lat, lon));
-      if (rotated.z <= 0) continue;
+        const rotated = rotateVec(latLonToVec(lat, lon));
+        if (rotated.z <= 0) continue;
 
-      const x = cx + rotated.x * radius;
-      const y = cy - rotated.y * radius;
-      const light = clamp(dot(rotated, sun) * 0.75 + 0.2, 0.12, 1);
-      const alpha = clamp((c - 0.36) * 0.8, 0.05, 0.24) * light;
-      ctx.fillStyle = `rgba(235, 246, 255, ${alpha})`;
-      const size = 1.8 + rotated.z * 1.25;
-      ctx.fillRect(x, y, size, size);
+        const x = cx + rotated.x * radius;
+        const y = cy - rotated.y * radius;
+        const light = clamp(dot(rotated, sun) * 0.75 + 0.2, 0.12, 1);
+        const alpha = clamp((c - 0.36) * 0.8, 0.05, 0.24) * light;
+        ctx.fillStyle = `rgba(235, 246, 255, ${alpha})`;
+        const size = 1.8 + rotated.z * 1.25;
+        ctx.fillRect(x, y, size, size);
+      }
     }
   }
 
@@ -460,13 +661,13 @@ function drawGlobe() {
 
     ctx.beginPath();
     ctx.arc(x, y, size, 0, Math.PI * 2);
-    ctx.fillStyle = node.detected ? "#6df2c8" : "#b2ebff";
+    ctx.fillStyle = node.detected ? planet.marker : "#cdeeff";
     ctx.fill();
 
     if (node.detected) {
       ctx.beginPath();
       ctx.arc(x, y, 10.5, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(109, 242, 200, 0.5)";
+      ctx.strokeStyle = "rgba(186, 227, 255, 0.46)";
       ctx.stroke();
     }
   });
@@ -532,6 +733,17 @@ function newRound() {
   renderNodeList();
   drawGlobe();
   coordInput.value = "";
+}
+
+function setPlanet(nextPlanet, silent = false) {
+  if (!PLANET_PRESETS[nextPlanet]) return;
+  state.currentPlanet = nextPlanet;
+  applyPlanetInfo();
+  updateStatusBar();
+  drawGlobe();
+  if (!silent) {
+    addLog(`${PLANET_PRESETS[nextPlanet].label} 모드로 전환.`);
+  }
 }
 
 function runScan(rawInput) {
@@ -693,6 +905,11 @@ function initUiParallax() {
 }
 
 function initEvents() {
+  planetSelectEl.addEventListener("change", () => {
+    setPlanet(planetSelectEl.value);
+    newRound();
+  });
+
   formEl.addEventListener("submit", (event) => {
     event.preventDefault();
     runScan(coordInput.value);
@@ -780,20 +997,22 @@ function initEvents() {
 }
 
 function animate() {
+  const planet = getCurrentPlanet();
   if (!state.dragging) {
-    state.yaw += 0.00035;
+    state.yaw += planet.spinSpeed;
   }
-  state.cloudShift = (state.cloudShift + 0.00065) % (Math.PI * 2);
+  state.cloudShift = (state.cloudShift + planet.cloudSpeed) % (Math.PI * 2);
   drawGlobe();
   requestAnimationFrame(animate);
 }
 
 initEvents();
 initUiParallax();
+setPlanet(state.currentPlanet, true);
 newRound();
 updateHud();
 updateStatusBar();
-addLog("Tracker online. 지구를 드래그해 회전하고 좌표를 스캔하세요.");
+addLog("Tracker online. 행성을 선택하고 좌표를 스캔하세요.");
 setInterval(tickCooldown, 100);
 requestAnimationFrame(() => {
   setupCanvasSize();
