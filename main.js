@@ -851,6 +851,28 @@ function drawSatellites(states, front = true) {
   }
 }
 
+function drawSmoothLowPerfSurface(cx, cy, radius, planet, sun) {
+  const base = planet.palette ? planet.palette.a : [86, 128, 176];
+  const litX = cx + sun.x * radius * 0.45;
+  const litY = cy - sun.y * radius * 0.38;
+  const shade = ctx.createRadialGradient(litX, litY, radius * 0.08, cx, cy, radius * 1.08);
+  shade.addColorStop(0, `rgb(${Math.min(255, base[0] + 45)}, ${Math.min(255, base[1] + 45)}, ${Math.min(255, base[2] + 45)})`);
+  shade.addColorStop(0.6, `rgb(${base[0]}, ${base[1]}, ${base[2]})`);
+  shade.addColorStop(1, `rgb(${Math.max(0, base[0] - 56)}, ${Math.max(0, base[1] - 56)}, ${Math.max(0, base[2] - 56)})`);
+  ctx.fillStyle = shade;
+  ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
+
+  if (planet.style === "gas" || planet.style === "ice") {
+    ctx.globalAlpha = 0.16;
+    for (let i = -4; i <= 4; i += 1) {
+      const y = cy + (i / 6) * radius;
+      ctx.fillStyle = i % 2 === 0 ? "rgba(255, 240, 220, 0.25)" : "rgba(40, 35, 30, 0.18)";
+      ctx.fillRect(cx - radius, y - radius * 0.055, radius * 2, radius * 0.11);
+    }
+    ctx.globalAlpha = 1;
+  }
+}
+
 function drawGlobe() {
   const planet = getCurrentPlanet();
   const width = canvas.clientWidth;
@@ -892,65 +914,62 @@ function drawGlobe() {
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.clip();
 
-  const zoomDetail = clamp((state.zoom - 0.6) / 0.95, 0, 1);
-  const dragPenalty = state.dragging ? 0.48 : 0;
-  const perfPenalty = state.lowPerf ? 0.42 : 0;
-  const surfaceStep = getSurfaceStep(planet) * (1 - zoomDetail * 0.22 + dragPenalty + perfPenalty);
-  for (let lat = -88; lat <= 88; lat += surfaceStep) {
-    for (let lon = -180; lon <= 180; lon += surfaceStep) {
-      const rotated = rotateVec(latLonToVec(lat, lon));
-      if (rotated.z <= 0) continue;
-
-      const x = cx + rotated.x * radius;
-      const y = cy - rotated.y * radius;
-
-      const detail = terrainDetail(lat, lon);
-      const light = clamp(dot(rotated, sun) * 0.92 + 0.08, 0.05, 1.04);
-      ctx.fillStyle = getPlanetColor(planet, lat, lon, detail, light, nowMs * 0.00001);
-      const size = surfaceStep * (1.15 + rotated.z * 0.42);
-      ctx.beginPath();
-      ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Intentionally removed night-light dots for a cleaner planetary surface.
-    }
-  }
-  if (!state.lowPerf) {
-    drawRingShadowOnPlanet(cx, cy, radius, planet);
-  }
-  // Removed high-contrast dotted overlays for cleaner planetary surfaces.
-
-  const withClouds = ["earth", "venus", "jupiter", "saturn", "uranus", "neptune"].includes(state.currentPlanet);
-  if (withClouds && !state.lowPerf) {
-    const cloudDrift = state.cloudShift * 20;
-    const cloudDensity = planet.label === "Venus" ? 1.15 : 1;
-    const cloudStep = 4.2 - zoomDetail * 0.35 + (state.dragging ? 0.8 : 0);
-    for (let lat = -85; lat <= 85; lat += cloudStep) {
-      for (let lon = -180; lon <= 180; lon += cloudStep) {
-        const mapLon = lon + cloudDrift;
-        const c = cloudNoise(lat, mapLon);
-        if (c < 0.36) continue;
-
+  if (state.lowPerf) {
+    drawSmoothLowPerfSurface(cx, cy, radius, planet, sun);
+  } else {
+    const zoomDetail = clamp((state.zoom - 0.6) / 0.95, 0, 1);
+    const dragPenalty = state.dragging ? 0.48 : 0;
+    const surfaceStep = getSurfaceStep(planet) * (1 - zoomDetail * 0.22 + dragPenalty);
+    for (let lat = -88; lat <= 88; lat += surfaceStep) {
+      for (let lon = -180; lon <= 180; lon += surfaceStep) {
         const rotated = rotateVec(latLonToVec(lat, lon));
         if (rotated.z <= 0) continue;
 
         const x = cx + rotated.x * radius;
         const y = cy - rotated.y * radius;
-        const light = clamp(dot(rotated, sun) * 0.75 + 0.2, 0.12, 1);
-        const alpha = clamp((c - 0.36) * 0.8, 0.05, 0.24) * light * cloudDensity;
-        const cloudColor =
-          planet.label === "Jupiter" || planet.label === "Saturn"
-            ? "245, 220, 194"
-            : planet.label === "Venus"
-            ? "255, 220, 168"
-            : planet.label === "Uranus" || planet.label === "Neptune"
-            ? "220, 241, 255"
-            : "235, 246, 255";
-        ctx.fillStyle = `rgba(${cloudColor}, ${alpha})`;
-        const size = 1.55 + rotated.z * 1.1;
+
+        const detail = terrainDetail(lat, lon);
+        const light = clamp(dot(rotated, sun) * 0.92 + 0.08, 0.05, 1.04);
+        ctx.fillStyle = getPlanetColor(planet, lat, lon, detail, light, nowMs * 0.00001);
+        const size = surfaceStep * (1.15 + rotated.z * 0.42);
         ctx.beginPath();
         ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
         ctx.fill();
+      }
+    }
+    drawRingShadowOnPlanet(cx, cy, radius, planet);
+    const withClouds = ["earth", "venus", "jupiter", "saturn", "uranus", "neptune"].includes(state.currentPlanet);
+    const cloudDrift = state.cloudShift * 20;
+    const cloudDensity = planet.label === "Venus" ? 1.15 : 1;
+    const cloudStep = 4.2 - zoomDetail * 0.35 + (state.dragging ? 0.8 : 0);
+    if (withClouds) {
+      for (let lat = -85; lat <= 85; lat += cloudStep) {
+        for (let lon = -180; lon <= 180; lon += cloudStep) {
+          const mapLon = lon + cloudDrift;
+          const c = cloudNoise(lat, mapLon);
+          if (c < 0.36) continue;
+
+          const rotated = rotateVec(latLonToVec(lat, lon));
+          if (rotated.z <= 0) continue;
+
+          const x = cx + rotated.x * radius;
+          const y = cy - rotated.y * radius;
+          const light = clamp(dot(rotated, sun) * 0.75 + 0.2, 0.12, 1);
+          const alpha = clamp((c - 0.36) * 0.8, 0.05, 0.24) * light * cloudDensity;
+          const cloudColor =
+            planet.label === "Jupiter" || planet.label === "Saturn"
+              ? "245, 220, 194"
+              : planet.label === "Venus"
+              ? "255, 220, 168"
+              : planet.label === "Uranus" || planet.label === "Neptune"
+              ? "220, 241, 255"
+              : "235, 246, 255";
+          ctx.fillStyle = `rgba(${cloudColor}, ${alpha})`;
+          const size = 1.55 + rotated.z * 1.1;
+          ctx.beginPath();
+          ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
     }
   }
