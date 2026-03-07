@@ -8,10 +8,6 @@
   --alert: #ff9a9a;
   --glass: rgba(6, 18, 30, 0.7);
   --glass-strong: rgba(7, 19, 33, 0.88);
-  --ui-tilt-x: 0deg;
-  --ui-tilt-y: 0deg;
-  --ui-shift-x: 0px;
-  --ui-shift-y: 0px;
 }
 
 * {
@@ -74,6 +70,7 @@ body::after {
   border: 0;
   border-radius: 0;
   transform-style: preserve-3d;
+  transition: transform 220ms ease-out;
 }
 
 #globe-canvas {
@@ -99,7 +96,7 @@ body::after {
   align-items: center;
   gap: 14px;
   pointer-events: none;
-  transform: translate3d(var(--ui-shift-x), calc(var(--ui-shift-y) * -0.45), 22px);
+  transform: translate3d(0, 0, 22px);
   transition: transform 180ms ease-out;
 }
 
@@ -133,10 +130,7 @@ body::after {
   background: linear-gradient(150deg, rgba(9, 25, 40, 0.84), rgba(6, 16, 27, 0.8));
   padding: 14px;
   box-shadow: 0 20px 48px rgba(2, 9, 16, 0.62), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-  transform:
-    translate3d(calc(var(--ui-shift-x) * -0.9), calc(var(--ui-shift-y) * -0.75), 36px)
-    rotateX(var(--ui-tilt-x))
-    rotateY(calc(2.4deg + var(--ui-tilt-y)));
+  transform: translate3d(0, 0, 36px) rotateX(0deg) rotateY(2.4deg);
   transform-origin: left center;
   transition: transform 220ms ease-out;
 }
@@ -277,10 +271,7 @@ button:disabled {
   top: 106px;
   display: grid;
   gap: 8px;
-  transform:
-    translate3d(calc(var(--ui-shift-x) * 0.8), calc(var(--ui-shift-y) * -0.7), 32px)
-    rotateX(calc(var(--ui-tilt-x) * 0.7))
-    rotateY(calc(-2deg + var(--ui-tilt-y)));
+  transform: translate3d(0, 0, 32px) rotateX(0deg) rotateY(-2deg);
   transition: transform 220ms ease-out;
 }
 
@@ -326,9 +317,7 @@ button:disabled {
   background: linear-gradient(152deg, rgba(7, 19, 32, 0.92), rgba(6, 14, 24, 0.86));
   color: #bed3e5;
   font-size: 0.8rem;
-  transform:
-    translate3d(calc(var(--ui-shift-x) * -0.35), calc(var(--ui-shift-y) * -0.35), 26px)
-    rotateX(calc(var(--ui-tilt-x) * 0.5));
+  transform: translate3d(0, 0, 26px) rotateX(0deg);
   box-shadow: 0 14px 28px rgba(2, 9, 16, 0.58);
   transition: transform 220ms ease-out;
 }
@@ -350,9 +339,7 @@ button:disabled {
   border-radius: 15px;
   background: linear-gradient(150deg, rgba(8, 21, 35, 0.9), rgba(5, 14, 24, 0.86));
   padding: 16px;
-  transform:
-    translate3d(calc(var(--ui-shift-x) * -0.25), calc(var(--ui-shift-y) * -0.25), 8px)
-    rotateX(calc(1.4deg + var(--ui-tilt-x) * 0.45));
+  transform: translate3d(0, 0, 8px) rotateX(1.4deg) rotateY(0deg);
   box-shadow: 0 15px 30px rgba(2, 11, 18, 0.45);
   transition: transform 220ms ease-out;
 }

@@ -25,8 +25,12 @@ const logEl = document.getElementById("log");
 const nodeListEl = document.getElementById("node-list");
 const canvas = document.getElementById("globe-canvas");
 const ctx = canvas.getContext("2d");
-const rootStyle = document.documentElement.style;
 const stageEl = document.querySelector(".globe-stage");
+const topBarEl = document.querySelector(".top-bar");
+const leftPanelEl = document.querySelector(".left-panel");
+const mapToolsEl = document.querySelector(".map-tools");
+const statusBarEl = document.querySelector(".status-bar");
+const contentCardEls = Array.from(document.querySelectorAll(".content-card"));
 
 const dpr = window.devicePixelRatio || 1;
 const state = {
@@ -641,18 +645,42 @@ function handlePointerUp() {
   canvas.classList.remove("dragging");
 }
 
+function applyUiDepth(nx, ny) {
+  const shiftX = nx * 12;
+  const shiftY = ny * 8;
+
+  if (stageEl) {
+    stageEl.style.transform = `rotateX(${(-ny * 1.5).toFixed(2)}deg) rotateY(${(nx * 2.1).toFixed(2)}deg)`;
+  }
+  if (topBarEl) {
+    topBarEl.style.transform = `translate3d(${shiftX.toFixed(1)}px, ${(-shiftY * 0.45).toFixed(1)}px, 22px)`;
+  }
+  if (leftPanelEl) {
+    leftPanelEl.style.transform = `translate3d(${(-shiftX * 0.9).toFixed(1)}px, ${(-shiftY * 0.75).toFixed(1)}px, 36px) rotateX(${(-ny * 2.4).toFixed(2)}deg) rotateY(${(2.4 + nx * 4.5).toFixed(2)}deg)`;
+  }
+  if (mapToolsEl) {
+    mapToolsEl.style.transform = `translate3d(${(shiftX * 0.8).toFixed(1)}px, ${(-shiftY * 0.7).toFixed(1)}px, 32px) rotateX(${(-ny * 2.2).toFixed(2)}deg) rotateY(${(-2 + nx * 4).toFixed(2)}deg)`;
+  }
+  if (statusBarEl) {
+    statusBarEl.style.transform = `translate3d(${(-shiftX * 0.35).toFixed(1)}px, ${(-shiftY * 0.35).toFixed(1)}px, 26px) rotateX(${(-ny * 1.5).toFixed(2)}deg)`;
+  }
+
+  contentCardEls.forEach((card, idx) => {
+    const depth = 8 + idx * 0.8;
+    card.style.transform = `translate3d(${(-shiftX * 0.25).toFixed(1)}px, ${(-shiftY * 0.25).toFixed(1)}px, ${depth.toFixed(1)}px) rotateX(${(1.4 - ny * 1.2).toFixed(2)}deg) rotateY(${(nx * 1.4).toFixed(2)}deg)`;
+  });
+}
+
 function initUiParallax() {
   if (!stageEl || window.matchMedia("(pointer: coarse)").matches) return;
+
+  applyUiDepth(0, 0);
 
   const applyParallax = (clientX, clientY) => {
     const rect = stageEl.getBoundingClientRect();
     const nx = clamp((clientX - rect.left) / rect.width, 0, 1) * 2 - 1;
     const ny = clamp((clientY - rect.top) / rect.height, 0, 1) * 2 - 1;
-
-    rootStyle.setProperty("--ui-tilt-x", `${(-ny * 2.8).toFixed(2)}deg`);
-    rootStyle.setProperty("--ui-tilt-y", `${(nx * 3.4).toFixed(2)}deg`);
-    rootStyle.setProperty("--ui-shift-x", `${(nx * 8).toFixed(1)}px`);
-    rootStyle.setProperty("--ui-shift-y", `${(ny * 6).toFixed(1)}px`);
+    applyUiDepth(nx, ny);
   };
 
   stageEl.addEventListener("pointermove", (event) => {
@@ -660,10 +688,7 @@ function initUiParallax() {
   });
 
   stageEl.addEventListener("pointerleave", () => {
-    rootStyle.setProperty("--ui-tilt-x", "0deg");
-    rootStyle.setProperty("--ui-tilt-y", "0deg");
-    rootStyle.setProperty("--ui-shift-x", "0px");
-    rootStyle.setProperty("--ui-shift-y", "0px");
+    applyUiDepth(0, 0);
   });
 }
 
