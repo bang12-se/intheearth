@@ -77,6 +77,7 @@
 
       <div class="map-tools">
         <button id="drag-mode" aria-label="Toggle drag target">P</button>
+        <button id="cinema-mode" aria-label="Toggle cinema mode">C</button>
         <button id="compass-btn" aria-label="Reset north">
           <span id="compass-needle">▲</span>
         </button>
@@ -86,6 +87,18 @@
         <button id="tilt-down" aria-label="Tilt down">⌄</button>
         <button id="reset-view" aria-label="Reset view">N</button>
       </div>
+
+      <aside id="planet-info" class="planet-info panel">
+        <p class="planet-info-title">Planet Profile</p>
+        <div class="planet-info-grid">
+          <div><span>Type</span><strong id="info-type">-</strong></div>
+          <div><span>Radius</span><strong id="info-radius">-</strong></div>
+          <div><span>Gravity</span><strong id="info-gravity">-</strong></div>
+          <div><span>Day</span><strong id="info-day">-</strong></div>
+          <div><span>Year</span><strong id="info-year">-</strong></div>
+          <div><span>Moons</span><strong id="info-moons">-</strong></div>
+        </div>
+      </aside>
 
       <footer class="status-bar">
         <span id="view-coord">Lat ---, Lon ---</span>

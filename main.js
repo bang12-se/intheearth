@@ -12,6 +12,7 @@ const scanBtn = document.getElementById("scan-btn");
 const zoomInBtn = document.getElementById("zoom-in");
 const zoomOutBtn = document.getElementById("zoom-out");
 const dragModeBtn = document.getElementById("drag-mode");
+const cinemaModeBtn = document.getElementById("cinema-mode");
 const tiltUpBtn = document.getElementById("tilt-up");
 const tiltDownBtn = document.getElementById("tilt-down");
 const compassBtn = document.getElementById("compass-btn");
@@ -30,11 +31,18 @@ const stageEl = document.querySelector(".globe-stage");
 const topBarEl = document.querySelector(".top-bar");
 const leftPanelEl = document.querySelector(".left-panel");
 const mapToolsEl = document.querySelector(".map-tools");
+const planetInfoEl = document.getElementById("planet-info");
 const statusBarEl = document.querySelector(".status-bar");
 const contentCardEls = Array.from(document.querySelectorAll(".content-card"));
 const missionTitleEl = document.getElementById("mission-title");
 const missionSubEl = document.getElementById("mission-sub");
 const viewTargetEl = document.getElementById("view-target");
+const infoTypeEl = document.getElementById("info-type");
+const infoRadiusEl = document.getElementById("info-radius");
+const infoGravityEl = document.getElementById("info-gravity");
+const infoDayEl = document.getElementById("info-day");
+const infoYearEl = document.getElementById("info-year");
+const infoMoonsEl = document.getElementById("info-moons");
 
 const dpr = window.devicePixelRatio || 1;
 const RENDER_THEME = "solar-smash";
@@ -78,7 +86,12 @@ const state = {
   renderScale: dpr,
   lastRenderTs: 0,
   lowPerf: shouldUseLowPerf(),
-  currentPlanet: "earth"
+  currentPlanet: "earth",
+  cinemaMode: false,
+  impacts: [],
+  pointerDownX: 0,
+  pointerDownY: 0,
+  dragDistance: 0
 };
 
 const PLANET_PRESETS = {
@@ -210,6 +223,19 @@ const PLANET_PRESETS = {
     ring: null,
     marker: "#f0e0d2"
   }
+};
+
+const PLANET_INFO = {
+  sun: { type: "G-type Star", gravity: "274 m/s²", day: "25-35 d", year: "-", moons: "0" },
+  mercury: { type: "Rocky Planet", gravity: "3.7 m/s²", day: "58.6 d", year: "88 d", moons: "0" },
+  venus: { type: "Rocky Planet", gravity: "8.87 m/s²", day: "243 d", year: "225 d", moons: "0" },
+  earth: { type: "Rocky Planet", gravity: "9.8 m/s²", day: "24 h", year: "365 d", moons: "1" },
+  mars: { type: "Rocky Planet", gravity: "3.71 m/s²", day: "24.6 h", year: "687 d", moons: "2" },
+  jupiter: { type: "Gas Giant", gravity: "24.8 m/s²", day: "9.9 h", year: "11.86 y", moons: "95+" },
+  saturn: { type: "Gas Giant", gravity: "10.4 m/s²", day: "10.7 h", year: "29.4 y", moons: "140+" },
+  uranus: { type: "Ice Giant", gravity: "8.69 m/s²", day: "17.2 h", year: "84 y", moons: "27" },
+  neptune: { type: "Ice Giant", gravity: "11.2 m/s²", day: "16.1 h", year: "164.8 y", moons: "14" },
+  pluto: { type: "Dwarf Planet", gravity: "0.62 m/s²", day: "6.4 d", year: "248 y", moons: "5" }
 };
 
 const PLANET_SATELLITES = {
@@ -481,6 +507,32 @@ function applyPlanetInfo() {
   const planet = getCurrentPlanet();
   if (missionTitleEl) missionTitleEl.textContent = planet.title;
   if (missionSubEl) missionSubEl.textContent = planet.subtitle;
+  updatePlanetInfoPanel();
+}
+
+function updatePlanetInfoPanel() {
+  const preset = getCurrentPlanet();
+  const meta = PLANET_INFO[state.currentPlanet] || PLANET_INFO.earth;
+  if (!infoTypeEl) return;
+
+  infoTypeEl.textContent = meta.type;
+  infoRadiusEl.textContent = `${Math.round(preset.altitudeBase).toLocaleString()} km`;
+  infoGravityEl.textContent = meta.gravity;
+  infoDayEl.textContent = meta.day;
+  infoYearEl.textContent = meta.year;
+  infoMoonsEl.textContent = meta.moons;
+}
+
+function setCinemaMode(enabled, silent = false) {
+  state.cinemaMode = Boolean(enabled);
+  if (cinemaModeBtn) {
+    cinemaModeBtn.classList.toggle("active", state.cinemaMode);
+    cinemaModeBtn.textContent = state.cinemaMode ? "C*" : "C";
+    cinemaModeBtn.setAttribute("aria-label", state.cinemaMode ? "Cinema mode on" : "Cinema mode off");
+  }
+  if (!silent) {
+    addLog(state.cinemaMode ? "시네마 모드 활성화." : "시네마 모드 비활성화.");
+  }
 }
 
 function hash2(a, b) {
@@ -995,6 +1047,113 @@ function drawEarthContinents(cx, cy, radius, nowMs) {
   ctx.stroke();
 }
 
+function drawPlanetEventOverlay(cx, cy, radius, planet, nowMs) {
+  const eventT = nowMs * 0.001;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.globalCompositeOperation = "screen";
+
+  if (planet.label === "Earth") {
+    for (let i = 0; i < 22; i += 1) {
+      const lon = -180 + i * 16 + Math.sin(eventT + i) * 4;
+      const north = rotateVec(latLonToVec(74 + Math.sin(eventT * 0.9 + i) * 6, lon));
+      const south = rotateVec(latLonToVec(-74 - Math.sin(eventT * 1.1 + i) * 6, lon));
+      for (const p of [north, south]) {
+        if (p.z <= 0) continue;
+        const alpha = 0.05 + 0.1 * p.z;
+        ctx.fillStyle = `rgba(112, 255, 195, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(cx + p.x * radius, cy - p.y * radius, 1.3 + p.z * 1.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  } else if (planet.label === "Mars") {
+    for (let i = 0; i < 34; i += 1) {
+      const a = eventT * 0.6 + i * 0.26;
+      const lat = Math.sin(a * 0.6) * 26;
+      const lon = (a * 95) % 360 - 180;
+      const p = rotateVec(latLonToVec(lat, lon));
+      if (p.z <= 0) continue;
+      ctx.fillStyle = `rgba(235, 166, 96, ${0.025 + p.z * 0.07})`;
+      ctx.beginPath();
+      ctx.arc(cx + p.x * radius, cy - p.y * radius, 2 + (i % 3), 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (planet.label === "Jupiter") {
+    const p = rotateVec(latLonToVec(-18, 35 + Math.sin(eventT * 0.5) * 12));
+    if (p.z > 0) {
+      const x = cx + p.x * radius;
+      const y = cy - p.y * radius;
+      const storm = ctx.createRadialGradient(x, y, radius * 0.03, x, y, radius * 0.16);
+      storm.addColorStop(0, "rgba(242, 146, 105, 0.3)");
+      storm.addColorStop(1, "rgba(242, 146, 105, 0)");
+      ctx.fillStyle = storm;
+      ctx.beginPath();
+      ctx.arc(x, y, radius * 0.16, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (planet.label === "Saturn") {
+    const phase = 0.5 + 0.5 * Math.sin(eventT * 1.2);
+    ctx.fillStyle = `rgba(255, 232, 184, ${0.05 + phase * 0.08})`;
+    ctx.fillRect(cx - radius, cy - radius * 0.15, radius * 2, radius * 0.3);
+  } else if (planet.label === "Neptune" || planet.label === "Uranus") {
+    for (let i = 0; i < 18; i += 1) {
+      const a = eventT * (planet.label === "Neptune" ? 1.25 : 0.9) + i * 0.35;
+      const lat = Math.sin(a) * 34;
+      const lon = ((a * 80 + i * 12) % 360) - 180;
+      const p = rotateVec(latLonToVec(lat, lon));
+      if (p.z <= 0) continue;
+      ctx.fillStyle = `rgba(164, 216, 255, ${0.025 + p.z * 0.06})`;
+      ctx.beginPath();
+      ctx.arc(cx + p.x * radius, cy - p.y * radius, 1.3 + (i % 2), 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.restore();
+}
+
+function drawImpactMarks(cx, cy, radius, nowMs) {
+  if (state.impacts.length === 0) return;
+  state.impacts = state.impacts.filter((impact) => nowMs - impact.createdAt < impact.ttl);
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.clip();
+
+  for (const impact of state.impacts) {
+    const age = (nowMs - impact.createdAt) / impact.ttl;
+    const p = rotateVec(latLonToVec(impact.lat, impact.lon));
+    if (p.z <= 0) continue;
+
+    const x = cx + p.x * radius;
+    const y = cy - p.y * radius;
+    const r = radius * (0.018 + impact.strength * 0.02) * (0.8 + age * 0.6);
+    const glow = ctx.createRadialGradient(x, y, r * 0.25, x, y, r * 2.8);
+    glow.addColorStop(0, `rgba(255, 225, 190, ${0.22 * (1 - age)})`);
+    glow.addColorStop(1, "rgba(255, 140, 90, 0)");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(x, y, r * 2.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = `rgba(44, 19, 12, ${0.45 - age * 0.25})`;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x - r * 0.18, y - r * 0.14, r * 0.55, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(255, 190, 144, ${0.22 * (1 - age)})`;
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
 function getSolarSmashAccent(planet) {
   if (planet.style === "sun") return "255, 170, 96";
   if (planet.style === "gas") return "255, 198, 142";
@@ -1143,6 +1302,7 @@ function drawGlobe() {
 
   drawContinuousPlanetSurface(cx, cy, radius, planet, sun, nowMs);
   drawPlanetTexture(cx, cy, radius, sun, nowMs, planet);
+  drawPlanetEventOverlay(cx, cy, radius, planet, nowMs);
 
   if (!state.dragging && !state.lowPerf) {
     drawGasBandOverlay(cx, cy, radius, planet, nowMs);
@@ -1152,6 +1312,7 @@ function drawGlobe() {
   if (state.currentPlanet === "earth") {
     drawEarthContinents(cx, cy, radius, nowMs);
   }
+  drawImpactMarks(cx, cy, radius, nowMs);
   if (!state.lowPerf) {
     drawRingShadowOnPlanet(cx, cy, radius, planet);
   }
@@ -1258,6 +1419,7 @@ function newRound() {
 function setPlanet(nextPlanet, silent = false) {
   if (!PLANET_PRESETS[nextPlanet]) return;
   state.currentPlanet = nextPlanet;
+  state.impacts = [];
   applyPlanetInfo();
   updateStatusBar();
   drawGlobe();
@@ -1322,7 +1484,7 @@ function setZoom(nextZoom) {
   updateStatusBar();
 }
 
-function updateHoverCoordinate(clientX, clientY) {
+function screenToLatLon(clientX, clientY) {
   const rect = canvas.getBoundingClientRect();
   const x = clientX - rect.left;
   const y = clientY - rect.top;
@@ -1332,21 +1494,41 @@ function updateHoverCoordinate(clientX, clientY) {
   const nx = (x - cx) / radius;
   const ny = (cy - y) / radius;
   const r2 = nx * nx + ny * ny;
+  if (r2 > 1) return null;
 
-  if (r2 > 1) {
+  const nz = Math.sqrt(Math.max(0, 1 - r2));
+  const world = inverseRotateVec({ x: nx, y: ny, z: nz });
+  const lat = (Math.asin(clamp(world.y, -1, 1)) * 180) / Math.PI;
+  const lon = (Math.atan2(world.z, world.x) * 180) / Math.PI;
+  return { lat, lon };
+}
+
+function registerImpact(clientX, clientY) {
+  const hit = screenToLatLon(clientX, clientY);
+  if (!hit) return false;
+  state.impacts.unshift({
+    ...hit,
+    createdAt: Date.now(),
+    ttl: 12000,
+    strength: 0.8 + Math.random() * 0.8
+  });
+  if (state.impacts.length > 16) {
+    state.impacts.length = 16;
+  }
+  return true;
+}
+
+function updateHoverCoordinate(clientX, clientY) {
+  const hit = screenToLatLon(clientX, clientY);
+  if (!hit) {
     state.hoverLat = null;
     state.hoverLon = null;
     updateStatusBar();
     return;
   }
 
-  const nz = Math.sqrt(Math.max(0, 1 - r2));
-  const world = inverseRotateVec({ x: nx, y: ny, z: nz });
-  const lat = (Math.asin(clamp(world.y, -1, 1)) * 180) / Math.PI;
-  const lon = (Math.atan2(world.z, world.x) * 180) / Math.PI;
-
-  state.hoverLat = lat;
-  state.hoverLon = lon;
+  state.hoverLat = hit.lat;
+  state.hoverLon = hit.lon;
   updateStatusBar();
 }
 
@@ -1355,6 +1537,9 @@ function handlePointerDown(event) {
   canvas.classList.add("dragging");
   state.lastX = event.clientX;
   state.lastY = event.clientY;
+  state.pointerDownX = event.clientX;
+  state.pointerDownY = event.clientY;
+  state.dragDistance = 0;
   updateHoverCoordinate(event.clientX, event.clientY);
 }
 
@@ -1362,6 +1547,7 @@ function handlePointerMove(event) {
   if (state.dragging) {
     const dx = event.clientX - state.lastX;
     const dy = event.clientY - state.lastY;
+    state.dragDistance += Math.hypot(dx, dy);
     state.lastX = event.clientX;
     state.lastY = event.clientY;
 
@@ -1376,9 +1562,16 @@ function handlePointerMove(event) {
   updateHoverCoordinate(event.clientX, event.clientY);
 }
 
-function handlePointerUp() {
+function handlePointerUp(event) {
+  const clickLike = state.dragDistance < 10;
   state.dragging = false;
   canvas.classList.remove("dragging");
+  if (clickLike && event && typeof event.clientX === "number") {
+    if (registerImpact(event.clientX, event.clientY)) {
+      addLog("충돌 이펙트 생성.");
+      drawGlobe();
+    }
+  }
 }
 
 function setDragMode(mode) {
@@ -1405,6 +1598,9 @@ function applyUiDepth(nx, ny) {
   }
   if (mapToolsEl) {
     mapToolsEl.style.transform = `translate3d(${(shiftX * 0.8).toFixed(1)}px, ${(-shiftY * 0.7).toFixed(1)}px, 32px) rotateX(${(-ny * 2.2).toFixed(2)}deg) rotateY(${(-2 + nx * 4).toFixed(2)}deg)`;
+  }
+  if (planetInfoEl) {
+    planetInfoEl.style.transform = `translate3d(${(shiftX * 0.5).toFixed(1)}px, ${(-shiftY * 0.55).toFixed(1)}px, 24px) rotateX(${(-ny * 1.5).toFixed(2)}deg) rotateY(${(-nx * 1.4).toFixed(2)}deg)`;
   }
   if (statusBarEl) {
     statusBarEl.style.transform = `translate3d(${(-shiftX * 0.35).toFixed(1)}px, ${(-shiftY * 0.35).toFixed(1)}px, 26px) rotateX(${(-ny * 1.5).toFixed(2)}deg)`;
@@ -1494,6 +1690,10 @@ function initEvents() {
     addLog(nextMode === "space" ? "드래그 모드: 우주 배경" : "드래그 모드: 행성");
   });
 
+  cinemaModeBtn.addEventListener("click", () => {
+    setCinemaMode(!state.cinemaMode);
+  });
+
   tiltUpBtn.addEventListener("click", () => {
     state.pitch = clamp(state.pitch - 0.08, -1.25, 1.25);
     updateStatusBar();
@@ -1549,7 +1749,17 @@ function animate() {
 
   const planet = getCurrentPlanet();
   if (!state.dragging) {
-    state.yaw += planet.spinSpeed;
+    if (state.cinemaMode) {
+      state.yaw += planet.spinSpeed * 2.1;
+      state.pitch = -0.45 + Math.sin(now * 0.00035) * 0.32;
+      state.bgYaw += 0.0009;
+      state.bgPitch = Math.sin(now * 0.00024) * 0.24;
+      const targetZoom = 0.9 + Math.sin(now * 0.00028) * 0.34;
+      state.zoom = clamp(targetZoom, 0.66, 1.42);
+      updateStatusBar();
+    } else {
+      state.yaw += planet.spinSpeed;
+    }
   }
   state.cloudShift = (state.cloudShift + planet.cloudSpeed) % (Math.PI * 2);
   drawGlobe();
@@ -1558,6 +1768,7 @@ function animate() {
 
 initEvents();
 setDragMode(state.dragMode);
+setCinemaMode(state.cinemaMode, true);
 setPlanet(state.currentPlanet, true);
 newRound();
 updateHud();

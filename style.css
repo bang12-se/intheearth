@@ -325,6 +325,50 @@ button:disabled {
   transition: transform 220ms ease-out;
 }
 
+.planet-info {
+  position: absolute;
+  right: 14px;
+  bottom: 84px;
+  width: min(260px, 68vw);
+  padding: 11px 12px;
+  border: 1px solid #723019;
+  border-radius: 10px;
+  background: linear-gradient(152deg, rgba(40, 15, 11, 0.92), rgba(24, 10, 8, 0.88));
+  box-shadow: 0 12px 26px rgba(8, 4, 3, 0.62);
+  transform: translate3d(0, 0, 24px);
+  transition: transform 220ms ease-out;
+}
+
+.planet-info-title {
+  margin: 0 0 8px;
+  color: #ffd4b2;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: "Barlow Condensed", "Rajdhani", sans-serif;
+}
+
+.planet-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.planet-info-grid span {
+  display: block;
+  color: #efbb98;
+  font-size: 0.69rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.planet-info-grid strong {
+  display: block;
+  margin-top: 2px;
+  color: #ffe3cd;
+  font-size: 0.86rem;
+}
+
 .map-tools button {
   width: 46px;
   height: 46px;
@@ -502,6 +546,13 @@ button:disabled {
   .map-tools {
     right: 10px;
     top: 136px;
+    transform: none;
+  }
+
+  .planet-info {
+    right: 10px;
+    bottom: 92px;
+    width: min(240px, 62vw);
     transform: none;
   }
 
