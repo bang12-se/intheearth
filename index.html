@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta
     name="description"
-    content="Geo Signal Tracker는 위도/경도 기반 지구 탐색 시뮬레이션과 지리 학습 콘텐츠를 제공하는 웹사이트입니다."
+    content="Geo Signal Tracker는 태양계 천체를 인터랙티브 뷰로 탐색하는 소개형 시뮬레이션 웹사이트입니다."
   />
   <meta name="robots" content="index,follow,max-image-preview:large" />
   <meta name="google-adsense-account" content="ca-pub-2915741349735828" />
-  <title>Geo Signal Tracker</title>
+  <title>Planet Strike Console</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Rajdhani:wght@400;500;700&display=swap"
     rel="stylesheet"
   />
   <link href="/style.css" rel="stylesheet" />
@@ -29,7 +29,7 @@
       <canvas id="globe-canvas" width="900" height="900" aria-label="interactive earth"></canvas>
 
       <header class="top-bar">
-        <div class="brand">Geo Signal Tracker | Space Explorer</div>
+        <div class="brand">SOLAR STRIKE // PLANETARY CONTROL</div>
         <form id="strike-form" autocomplete="off" class="search-wrap">
           <select id="planet-select" name="planet" aria-label="Select planet">
             <option value="sun">Sun</option>
@@ -43,18 +43,18 @@
             <option value="neptune">Neptune</option>
             <option value="pluto">Pluto</option>
           </select>
-          <input id="coord-input" name="coord" type="text" placeholder="좌표 입력: 37.5665, 126.9780" required />
-          <button id="fire-btn" type="submit">Scan</button>
+          <p class="intro-chip">실시간 행성 뷰를 드래그하고 줌으로 탐색하는 인터랙티브 소개 화면입니다.</p>
+          <button id="fire-btn" type="button">서비스 소개</button>
         </form>
       </header>
 
       <aside class="left-panel panel">
-        <p class="eyebrow">Orbital Mode</p>
+        <p class="eyebrow">Orbital Weapon Grid</p>
         <h1 id="mission-title">Earth From Space</h1>
-        <p id="mission-sub" class="sub">우주에서 지구를 바라보는 탐색 화면입니다. 드래그로 회전하고, 실제 위도/경도로 스캔하세요.</p>
+        <p id="mission-sub" class="sub">우주에서 지구를 바라보는 탐색 화면입니다. 드래그와 줌으로 자유롭게 둘러보세요.</p>
 
         <form class="scan-form">
-          <button id="scan-btn" class="secondary" type="button">New Sweep</button>
+          <button id="scan-btn" class="secondary" type="button">Reset Targets</button>
         </form>
 
         <div class="hud-grid">
@@ -101,8 +101,8 @@
       <article class="content-card">
         <h2>서비스 소개</h2>
         <p>
-          Geo Signal Tracker는 실제 위도/경도 좌표를 입력해 지구 표면의 가상 신호원을 탐지하는
-          교육용 시뮬레이션입니다. 인터랙티브 지구 인터페이스를 통해 지도 좌표 감각과 지리 개념을 쉽게 학습할 수 있습니다.
+          Geo Signal Tracker는 태양계 천체를 인터랙티브 3D 스타일 화면으로 탐색할 수 있는 소개형 시뮬레이션입니다.
+          드래그, 줌, 틸트 컨트롤로 시점을 바꾸며 각 행성의 분위기와 시각적 특징을 직관적으로 살펴볼 수 있습니다.
         </p>
       </article>
 
@@ -119,10 +119,10 @@
       <article class="content-card">
         <h2>이용 가이드</h2>
         <ol>
-          <li>우측 상단 입력창에 위도/경도 형식(`예: 37.5665, 126.9780`)으로 좌표를 입력합니다.</li>
-          <li>`Scan` 버튼으로 신호 탐지를 실행합니다.</li>
-          <li>`+ / - / Tilt / Compass`로 시점을 조절하며 위치를 탐색합니다.</li>
-          <li>하단 상태바에서 현재 좌표, 방향, 고도를 확인합니다.</li>
+          <li>상단 행성 선택 메뉴에서 보고 싶은 천체를 선택합니다.</li>
+          <li>마우스/터치 드래그로 시점을 회전하며 표면과 조명 변화를 확인합니다.</li>
+          <li>`+ / - / Tilt / Compass`로 확대, 축소, 기울기, 방향을 조절합니다.</li>
+          <li>하단 상태바에서 현재 방향, 고도, 타겟 행성 정보를 확인합니다.</li>
         </ol>
       </article>
 

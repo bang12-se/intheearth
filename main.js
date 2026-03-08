@@ -7,7 +7,6 @@ const hitsEl = document.getElementById("hits");
 const cooldownEl = document.getElementById("cooldown");
 const formEl = document.getElementById("strike-form");
 const planetSelectEl = document.getElementById("planet-select");
-const coordInput = document.getElementById("coord-input");
 const fireBtn = document.getElementById("fire-btn");
 const scanBtn = document.getElementById("scan-btn");
 const zoomInBtn = document.getElementById("zoom-in");
@@ -123,7 +122,7 @@ const PLANET_PRESETS = {
   earth: {
     label: "Earth",
     title: "Earth From Space",
-    subtitle: "우주에서 지구를 바라보는 탐색 화면입니다. 드래그로 회전하고, 실제 위도/경도로 스캔하세요.",
+    subtitle: "우주에서 지구를 바라보는 탐색 화면입니다. 드래그와 줌으로 자유롭게 둘러보세요.",
     altitudeBase: 6371,
     spinSpeed: 0.00035,
     cloudSpeed: 0.00065,
@@ -1125,7 +1124,6 @@ function newRound() {
   }));
   renderNodeList();
   drawGlobe();
-  coordInput.value = "";
 }
 
 function setPlanet(nextPlanet, silent = false) {
@@ -1318,8 +1316,10 @@ function initEvents() {
 
   formEl.addEventListener("submit", (event) => {
     event.preventDefault();
-    runScan(coordInput.value);
-    coordInput.select();
+  });
+
+  fireBtn.addEventListener("click", () => {
+    addLog("서비스 소개: 드래그로 회전, 휠/버튼으로 줌, 행성 선택으로 장면을 전환하세요.");
   });
 
   scanBtn.addEventListener("click", () => {
@@ -1433,7 +1433,7 @@ setPlanet(state.currentPlanet, true);
 newRound();
 updateHud();
 updateStatusBar();
-addLog("Tracker online. 행성을 선택하고 좌표를 스캔하세요.");
+addLog("Tracker online. 행성을 선택하고 화면을 자유롭게 탐색하세요.");
 setInterval(tickCooldown, 100);
 requestAnimationFrame(() => {
   setupCanvasSize();
