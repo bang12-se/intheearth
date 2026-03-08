@@ -291,14 +291,14 @@ function getRenderQuality() {
   const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
   const cores = typeof navigator.hardwareConcurrency === "number" ? navigator.hardwareConcurrency : 4;
   const memory = typeof navigator.deviceMemory === "number" ? navigator.deviceMemory : null;
-  let quality = coarsePointer ? 1.12 : 1.56;
+  let quality = coarsePointer ? 1.22 : 1.72;
   if (!coarsePointer && cores >= 10) quality += 0.1;
   if (memory !== null && memory >= 8) quality += 0.08;
   if (cores <= 6) quality -= 0.12;
   if (memory !== null && memory <= 4) quality -= 0.12;
   if (window.innerWidth < 900) quality -= 0.1;
   if (!coarsePointer && window.innerWidth > 1400) quality += 0.08;
-  return clamp(quality, 1, 2.5);
+  return clamp(quality, 1.08, 2.8);
 }
 
 function setupCanvasSize() {
@@ -794,16 +794,16 @@ function getPlanetRimColor(planet) {
 function drawGasBandOverlay(cx, cy, radius, planet, now) {
   if (!(planet.style === "gas" || planet.style === "ice")) return;
 
-  for (let lat = -72; lat <= 72; lat += 6.5) {
+  for (let lat = -72; lat <= 72; lat += 4.8) {
     const band = 0.5 + 0.5 * Math.sin(lat * 0.55 + now * 0.0012);
-    for (let lon = -180; lon <= 180; lon += 4.2) {
+    for (let lon = -180; lon <= 180; lon += 3.1) {
       const rotated = rotateVec(latLonToVec(lat, lon));
       if (rotated.z <= 0) continue;
       const x = cx + rotated.x * radius;
       const y = cy - rotated.y * radius;
       const alpha = (0.02 + band * 0.05) * rotated.z;
       ctx.fillStyle = `rgba(255, 250, 240, ${alpha})`;
-      ctx.fillRect(x, y, 1.1, 1.1);
+      ctx.fillRect(x, y, 0.92, 0.92);
     }
   }
 }
@@ -811,9 +811,9 @@ function drawGasBandOverlay(cx, cy, radius, planet, now) {
 function drawRockyCraterOverlay(cx, cy, radius, planet) {
   if (!(planet.style === "rocky" || planet.style === "mars" || planet.style === "dwarf")) return;
 
-  for (let lat = -78; lat <= 78; lat += 7) {
-    for (let lon = -180; lon <= 180; lon += 7) {
-      if (hash2(lat * 3.1, lon * 1.7) < 0.985) continue;
+  for (let lat = -78; lat <= 78; lat += 5.2) {
+    for (let lon = -180; lon <= 180; lon += 5.2) {
+      if (hash2(lat * 3.1, lon * 1.7) < 0.978) continue;
       const rotated = rotateVec(latLonToVec(lat, lon));
       if (rotated.z <= 0) continue;
 
@@ -931,18 +931,18 @@ function drawContinuousPlanetSurface(cx, cy, radius, planet, sun, nowMs) {
 
 function getPlanetTextureSettings(planet) {
   if (state.dragging) {
-    return { latStep: 2.35, lonStep: 2.35, pointSize: 1.42, cloudStep: 4.6 };
+    return { latStep: 1.95, lonStep: 1.95, pointSize: 1.18, cloudStep: 3.9 };
   }
   if (state.lowPerf) {
-    return { latStep: 1.65, lonStep: 1.65, pointSize: 1.08, cloudStep: 3.1 };
+    return { latStep: 1.25, lonStep: 1.25, pointSize: 0.92, cloudStep: 2.4 };
   }
   if (planet.style === "sun" || planet.style === "gas" || planet.style === "ice") {
-    return { latStep: 0.95, lonStep: 0.95, pointSize: 0.74, cloudStep: 1.7 };
+    return { latStep: 0.62, lonStep: 0.62, pointSize: 0.52, cloudStep: 1.18 };
   }
   if (planet.style === "earth") {
-    return { latStep: 0.68, lonStep: 0.68, pointSize: 0.65, cloudStep: 1.2 };
+    return { latStep: 0.48, lonStep: 0.48, pointSize: 0.44, cloudStep: 0.94 };
   }
-  return { latStep: 0.82, lonStep: 0.82, pointSize: 0.69, cloudStep: 1.45 };
+  return { latStep: 0.56, lonStep: 0.56, pointSize: 0.48, cloudStep: 1.02 };
 }
 
 function drawPlanetTexture(cx, cy, radius, sun, nowMs, planet) {
