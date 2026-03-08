@@ -417,10 +417,48 @@ button:disabled {
   line-height: 1.54;
 }
 
+.content-card h3 {
+  margin: 12px 0 6px;
+  font-family: "Barlow Condensed", "Rajdhani", sans-serif;
+  letter-spacing: 0.03em;
+  font-size: 0.94rem;
+  text-transform: uppercase;
+  color: #ffcfab;
+}
+
 .content-card ul,
 .content-card ol {
   margin: 0;
   padding-left: 18px;
+}
+
+.earth-facts-grid {
+  margin: 10px 0 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.fact-item {
+  border: 1px solid #6b301d;
+  border-radius: 9px;
+  padding: 8px 10px;
+  background: linear-gradient(155deg, rgba(58, 22, 15, 0.9), rgba(35, 14, 10, 0.88));
+}
+
+.fact-item span {
+  display: block;
+  color: #f0bb96;
+  font-size: 0.73rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.fact-item strong {
+  display: block;
+  margin-top: 3px;
+  color: #ffe3cd;
+  font-size: 0.96rem;
 }
 
 .policy-links {
@@ -484,5 +522,9 @@ button:disabled {
 
   .content-card {
     transform: none;
+  }
+
+  .earth-facts-grid {
+    grid-template-columns: 1fr;
   }
 }
