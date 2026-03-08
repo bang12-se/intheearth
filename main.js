@@ -1025,7 +1025,7 @@ function drawGlobe() {
 
   drawContinuousPlanetSurface(cx, cy, radius, planet, sun, nowMs);
   if (state.currentPlanet === "earth") {
-    drawEarthTexture(cx, cy, radius, sun, nowMs);
+    // Keep Earth shading continuous to avoid visible dotted artifacts.
     drawEarthContinents(cx, cy, radius, nowMs);
   }
   if (!state.lowPerf) {
