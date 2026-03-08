@@ -877,20 +877,25 @@ function drawContinuousPlanetSurface(cx, cy, radius, planet, sun, nowMs) {
   ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
 }
 
-function getEarthTextureSettings() {
+function getPlanetTextureSettings(planet) {
   if (state.dragging) {
-    return { latStep: 2.2, lonStep: 2.2, pointSize: 1.45, cloudStep: 4.1 };
+    return { latStep: 2.35, lonStep: 2.35, pointSize: 1.42, cloudStep: 4.6 };
   }
   if (state.lowPerf) {
-    return { latStep: 1.5, lonStep: 1.5, pointSize: 1.12, cloudStep: 2.6 };
+    return { latStep: 1.65, lonStep: 1.65, pointSize: 1.08, cloudStep: 3.1 };
   }
-  return { latStep: 0.6, lonStep: 0.6, pointSize: 0.66, cloudStep: 1.2 };
+  if (planet.style === "sun" || planet.style === "gas" || planet.style === "ice") {
+    return { latStep: 0.95, lonStep: 0.95, pointSize: 0.74, cloudStep: 1.7 };
+  }
+  if (planet.style === "earth") {
+    return { latStep: 0.68, lonStep: 0.68, pointSize: 0.65, cloudStep: 1.2 };
+  }
+  return { latStep: 0.82, lonStep: 0.82, pointSize: 0.69, cloudStep: 1.45 };
 }
 
-function drawEarthTexture(cx, cy, radius, sun, nowMs) {
-  const planet = PLANET_PRESETS.earth;
+function drawPlanetTexture(cx, cy, radius, sun, nowMs, planet) {
   const now = nowMs * 0.00008;
-  const settings = getEarthTextureSettings();
+  const settings = getPlanetTextureSettings(planet);
 
   for (let lat = -90; lat <= 90; lat += settings.latStep) {
     for (let lon = -180; lon <= 180; lon += settings.lonStep) {
@@ -908,11 +913,18 @@ function drawEarthTexture(cx, cy, radius, sun, nowMs) {
     }
   }
 
+  const needsClouds =
+    planet.style === "earth" || planet.style === "venus" || planet.style === "gas" || planet.style === "ice";
+
+  if (!needsClouds) {
+    return;
+  }
+
   for (let lat = -78; lat <= 78; lat += settings.cloudStep) {
     for (let lon = -180; lon <= 180; lon += settings.cloudStep * 1.25) {
       const shiftedLon = lon + state.cloudShift * 140;
       const cloud = cloudNoise(lat, shiftedLon);
-      if (cloud < 0.18) continue;
+      if (cloud < 0.2) continue;
 
       const rotated = rotateVec(latLonToVec(lat, shiftedLon));
       if (rotated.z <= 0) continue;
@@ -921,7 +933,11 @@ function drawEarthTexture(cx, cy, radius, sun, nowMs) {
       const x = cx + rotated.x * radius;
       const y = cy - rotated.y * radius;
       const s = settings.pointSize * 1.25;
-      ctx.fillStyle = `rgba(238, 248, 255, ${alpha})`;
+      let cloudColor = "238, 248, 255";
+      if (planet.style === "venus") cloudColor = "255, 218, 164";
+      if (planet.style === "gas") cloudColor = "245, 226, 198";
+      if (planet.style === "ice") cloudColor = "210, 236, 255";
+      ctx.fillStyle = `rgba(${cloudColor}, ${alpha})`;
       ctx.fillRect(x - s * 0.5, y - s * 0.5, s, s);
     }
   }
@@ -1126,8 +1142,14 @@ function drawGlobe() {
   ctx.clip();
 
   drawContinuousPlanetSurface(cx, cy, radius, planet, sun, nowMs);
+  drawPlanetTexture(cx, cy, radius, sun, nowMs, planet);
+
+  if (!state.dragging && !state.lowPerf) {
+    drawGasBandOverlay(cx, cy, radius, planet, nowMs);
+    drawRockyCraterOverlay(cx, cy, radius, planet);
+  }
+
   if (state.currentPlanet === "earth") {
-    // Keep Earth shading continuous to avoid visible dotted artifacts.
     drawEarthContinents(cx, cy, radius, nowMs);
   }
   if (!state.lowPerf) {
