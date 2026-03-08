@@ -37,6 +37,7 @@ const missionSubEl = document.getElementById("mission-sub");
 const viewTargetEl = document.getElementById("view-target");
 
 const dpr = window.devicePixelRatio || 1;
+const RENDER_THEME = "solar-smash";
 
 function shouldUseLowPerf() {
   const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
@@ -978,6 +979,108 @@ function drawEarthContinents(cx, cy, radius, nowMs) {
   ctx.stroke();
 }
 
+function getSolarSmashAccent(planet) {
+  if (planet.style === "sun") return "255, 170, 96";
+  if (planet.style === "gas") return "255, 198, 142";
+  if (planet.style === "ice") return "156, 211, 255";
+  if (planet.label === "Earth") return "126, 194, 255";
+  if (planet.label === "Mars") return "255, 144, 102";
+  return "255, 178, 132";
+}
+
+function drawSolarSmashCracks(cx, cy, radius, planet, nowMs) {
+  if (planet.style === "sun" || planet.style === "gas" || planet.style === "ice") return;
+
+  const pulse = 0.55 + 0.45 * Math.sin(nowMs * 0.0021);
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.globalCompositeOperation = "screen";
+
+  for (let i = 0; i < 11; i += 1) {
+    const seed = i * 17.11 + planet.label.length * 3.7;
+    const a = hash2(seed, 1.3) * Math.PI * 2 + nowMs * 0.00004 * (i % 2 ? 1 : -1);
+    const b = a + (hash2(seed, 7.9) - 0.5) * 1.25;
+    const r1 = radius * (0.12 + hash2(seed, 3.1) * 0.72);
+    const r2 = radius * (0.34 + hash2(seed, 5.7) * 0.62);
+    const cp = radius * (0.18 + hash2(seed, 9.6) * 0.56);
+    const x1 = cx + Math.cos(a) * r1;
+    const y1 = cy + Math.sin(a) * r1;
+    const x2 = cx + Math.cos(b) * r2;
+    const y2 = cy + Math.sin(b) * r2;
+    const xc = cx + Math.cos((a + b) * 0.5) * cp;
+    const yc = cy + Math.sin((a + b) * 0.5) * cp;
+
+    const alpha = (0.09 + hash2(seed, 11.2) * 0.2) * pulse;
+    ctx.strokeStyle = `rgba(255, 166, 106, ${alpha})`;
+    ctx.lineWidth = 0.7 + hash2(seed, 12.4) * 1.5;
+    ctx.shadowColor = "rgba(255, 124, 77, 0.45)";
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.quadraticCurveTo(xc, yc, x2, y2);
+    ctx.stroke();
+  }
+
+  ctx.shadowBlur = 0;
+  ctx.restore();
+}
+
+function drawSolarSmashPostFx(width, height, cx, cy, radius, planet, nowMs) {
+  const accent = getSolarSmashAccent(planet);
+  const pulse = 0.5 + 0.5 * Math.sin(nowMs * 0.0024);
+
+  const blast = ctx.createRadialGradient(cx, cy, radius * 0.94, cx, cy, radius * 1.55);
+  blast.addColorStop(0, "rgba(255, 255, 255, 0)");
+  blast.addColorStop(0.42, `rgba(${accent}, ${0.09 + pulse * 0.09})`);
+  blast.addColorStop(1, "rgba(0, 0, 0, 0)");
+  ctx.fillStyle = blast;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 1.55, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+  for (let i = 0; i < 38; i += 1) {
+    const t = nowMs * 0.001 + i * 0.29;
+    const a = (i / 38) * Math.PI * 2 + Math.sin(t) * 0.08;
+    const inner = radius * (1.01 + 0.02 * Math.sin(t * 1.7));
+    const outer = radius * (1.11 + 0.07 * (0.5 + 0.5 * Math.sin(t * 1.3 + i)));
+    const x1 = cx + Math.cos(a) * inner;
+    const y1 = cy + Math.sin(a) * inner;
+    const x2 = cx + Math.cos(a) * outer;
+    const y2 = cy + Math.sin(a) * outer;
+    ctx.strokeStyle = `rgba(${accent}, ${0.06 + 0.12 * (0.5 + 0.5 * Math.sin(t * 2.1))})`;
+    ctx.lineWidth = 0.6 + (i % 3) * 0.35;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  if (!state.lowPerf) {
+    ctx.fillStyle = "rgba(255, 166, 112, 0.035)";
+    for (let y = 0; y < height; y += 4) {
+      ctx.fillRect(0, y, width, 1);
+    }
+  }
+
+  const vignette = ctx.createRadialGradient(
+    width * 0.5,
+    height * 0.52,
+    Math.min(width, height) * 0.28,
+    width * 0.5,
+    height * 0.52,
+    Math.max(width, height) * 0.88
+  );
+  vignette.addColorStop(0, "rgba(0, 0, 0, 0)");
+  vignette.addColorStop(1, "rgba(0, 0, 0, 0.34)");
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, width, height);
+}
+
 function drawGlobe() {
   const planet = getCurrentPlanet();
   const width = canvas.clientWidth;
@@ -1083,6 +1186,10 @@ function drawGlobe() {
   }
   if (!state.dragging && (!state.lowPerf || allowLowPerfEarthMoon)) {
     drawSatellites(satelliteStates, true);
+  }
+  if (RENDER_THEME === "solar-smash") {
+    drawSolarSmashCracks(cx, cy, radius, planet, nowMs);
+    drawSolarSmashPostFx(width, height, cx, cy, radius, planet, nowMs);
   }
 
   // Removed outer rim stroke to avoid visible dotted/line artifacts.
