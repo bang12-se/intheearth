@@ -1634,14 +1634,18 @@ function newRound() {
 }
 
 function setPlanet(nextPlanet, silent = false) {
-  if (!PLANET_PRESETS[nextPlanet]) return;
-  state.currentPlanet = nextPlanet;
+  const key = String(nextPlanet || "").toLowerCase();
+  if (!PLANET_PRESETS[key]) return;
+  state.currentPlanet = key;
+  if (planetSelectEl && planetSelectEl.value !== key) {
+    planetSelectEl.value = key;
+  }
   state.impacts = [];
   applyPlanetInfo();
   updateStatusBar();
   drawGlobe();
   if (!silent) {
-    addLog(`${PLANET_PRESETS[nextPlanet].label} 모드로 전환.`);
+    addLog(`${PLANET_PRESETS[key].label} 모드로 전환.`);
   }
 }
 
