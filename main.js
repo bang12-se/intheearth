@@ -242,6 +242,19 @@ const PLANET_INFO = {
   pluto: { type: "Dwarf Planet", gravity: "0.62 m/s²", day: "6.4 d", year: "248 y", moons: "5" }
 };
 
+const PLANET_MOON_LIST = {
+  sun: ["수성", "금성", "지구", "화성", "목성", "토성", "천왕성", "해왕성"],
+  mercury: [],
+  venus: [],
+  earth: ["달"],
+  mars: ["포보스", "데이모스"],
+  jupiter: ["이오", "유로파", "가니메데", "칼리스토"],
+  saturn: ["타이탄", "엔셀라두스", "레아", "이아페투스"],
+  uranus: ["티타니아", "오베론", "움브리엘", "아리엘", "미란다"],
+  neptune: ["트리톤", "네레이드", "프로테우스"],
+  pluto: ["카론", "닉스", "히드라", "케르베로스", "스틱스"]
+};
+
 const PLANET_FEATURE_CONTENT = {
   sun: {
     title: "태양의 특징",
@@ -703,6 +716,26 @@ function renderPlanetFeatureCard() {
   }
 
   planetFeatureSectionsEl.textContent = "";
+
+  const moonTitle = document.createElement("h3");
+  moonTitle.textContent = state.currentPlanet === "sun" ? "주요 행성" : "주요 위성";
+  planetFeatureSectionsEl.appendChild(moonTitle);
+
+  const moonList = document.createElement("ul");
+  const moons = PLANET_MOON_LIST[state.currentPlanet] || [];
+  if (moons.length === 0) {
+    const li = document.createElement("li");
+    li.textContent = "없음";
+    moonList.appendChild(li);
+  } else {
+    for (const name of moons) {
+      const li = document.createElement("li");
+      li.textContent = name;
+      moonList.appendChild(li);
+    }
+  }
+  planetFeatureSectionsEl.appendChild(moonList);
+
   for (const group of feature.sections) {
     const h3 = document.createElement("h3");
     h3.textContent = group.title;
