@@ -476,6 +476,18 @@ button:disabled {
   padding-left: 18px;
 }
 
+.planet-feature-block {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(143, 73, 45, 0.5);
+}
+
+.planet-feature-block:first-child {
+  margin-top: 10px;
+  padding-top: 0;
+  border-top: 0;
+}
+
 .earth-facts-grid {
   margin: 10px 0 8px;
   display: grid;

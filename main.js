@@ -43,10 +43,7 @@ const infoGravityEl = document.getElementById("info-gravity");
 const infoDayEl = document.getElementById("info-day");
 const infoYearEl = document.getElementById("info-year");
 const infoMoonsEl = document.getElementById("info-moons");
-const planetFeatureTitleEl = document.getElementById("planet-feature-title");
-const planetFeatureIntroEl = document.getElementById("planet-feature-intro");
-const planetFactListEl = document.getElementById("planet-fact-list");
-const planetFeatureSectionsEl = document.getElementById("planet-feature-sections");
+const planetFeatureAllEl = document.getElementById("planet-feature-all");
 
 const dpr = window.devicePixelRatio || 1;
 const RENDER_THEME = "solar-smash";
@@ -680,42 +677,57 @@ function updateStatusBar() {
   compassNeedle.style.setProperty("--heading", `${-headingNormalized}deg`);
 }
 
-function renderPlanetFeatureCard() {
-  if (!planetFeatureTitleEl || !planetFeatureIntroEl || !planetFactListEl || !planetFeatureSectionsEl) return;
+function renderPlanetFeatureLibrary() {
+  if (!planetFeatureAllEl) return;
 
-  const feature = PLANET_FEATURE_CONTENT[state.currentPlanet] || PLANET_FEATURE_CONTENT.earth;
-  planetFeatureTitleEl.textContent = feature.title;
-  planetFeatureIntroEl.textContent = feature.intro;
+  const order = ["sun", "mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"];
+  planetFeatureAllEl.textContent = "";
 
-  planetFactListEl.textContent = "";
-  for (const [label, value] of feature.facts) {
-    const item = document.createElement("div");
-    item.className = "fact-item";
+  for (const key of order) {
+    const feature = PLANET_FEATURE_CONTENT[key];
+    if (!feature) continue;
 
-    const span = document.createElement("span");
-    span.textContent = label;
-    const strong = document.createElement("strong");
-    strong.textContent = value;
+    const section = document.createElement("section");
+    section.className = "planet-feature-block";
 
-    item.appendChild(span);
-    item.appendChild(strong);
-    planetFactListEl.appendChild(item);
-  }
+    const title = document.createElement("h3");
+    title.textContent = feature.title;
+    section.appendChild(title);
 
-  planetFeatureSectionsEl.textContent = "";
-  for (const section of feature.sections) {
-    const h3 = document.createElement("h3");
-    h3.textContent = section.title;
+    const intro = document.createElement("p");
+    intro.textContent = feature.intro;
+    section.appendChild(intro);
 
-    const ul = document.createElement("ul");
-    for (const bullet of section.bullets) {
-      const li = document.createElement("li");
-      li.textContent = bullet;
-      ul.appendChild(li);
+    const factGrid = document.createElement("div");
+    factGrid.className = "earth-facts-grid";
+    for (const [label, value] of feature.facts) {
+      const item = document.createElement("div");
+      item.className = "fact-item";
+      const span = document.createElement("span");
+      span.textContent = label;
+      const strong = document.createElement("strong");
+      strong.textContent = value;
+      item.appendChild(span);
+      item.appendChild(strong);
+      factGrid.appendChild(item);
+    }
+    section.appendChild(factGrid);
+
+    for (const group of feature.sections) {
+      const h4 = document.createElement("h3");
+      h4.textContent = group.title;
+      section.appendChild(h4);
+
+      const ul = document.createElement("ul");
+      for (const bullet of group.bullets) {
+        const li = document.createElement("li");
+        li.textContent = bullet;
+        ul.appendChild(li);
+      }
+      section.appendChild(ul);
     }
 
-    planetFeatureSectionsEl.appendChild(h3);
-    planetFeatureSectionsEl.appendChild(ul);
+    planetFeatureAllEl.appendChild(section);
   }
 }
 
@@ -724,7 +736,6 @@ function applyPlanetInfo() {
   if (missionTitleEl) missionTitleEl.textContent = planet.title;
   if (missionSubEl) missionSubEl.textContent = planet.subtitle;
   updatePlanetInfoPanel();
-  renderPlanetFeatureCard();
 }
 
 function updatePlanetInfoPanel() {
@@ -1989,6 +2000,7 @@ initEvents();
 setDragMode(state.dragMode);
 setCinemaMode(state.cinemaMode, true);
 setPlanet(state.currentPlanet, true);
+renderPlanetFeatureLibrary();
 newRound();
 updateHud();
 updateStatusBar();
