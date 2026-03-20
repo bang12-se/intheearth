@@ -98,6 +98,22 @@ const state = {
   dragDistance: 0
 };
 
+const STAR_PORTAL_TARGETS = [
+  { key: "sirius", label: "Sirius A", x: 0.86, y: 0.18, color: "169, 220, 255" },
+  { key: "proxima", label: "Proxima", x: 0.13, y: 0.8, color: "255, 155, 122" }
+];
+
+function getStarPortalScreenTargets(width, height) {
+  const driftX = state.bgYaw * 120;
+  const driftY = state.bgPitch * 95;
+  return STAR_PORTAL_TARGETS.map((target) => ({
+    ...target,
+    xPx: ((width * target.x + driftX * 0.85) % width + width) % width,
+    yPx: ((height * target.y + driftY * 0.65) % height + height) % height,
+    hitRadius: 16
+  }));
+}
+
 const PLANET_PRESETS = {
   sun: {
     label: "Sun",
@@ -732,6 +748,27 @@ function drawSpaceBackground(width, height, now, cx, cy, radius) {
     ctx.fill();
   }
   ctx.globalAlpha = 1;
+
+  const starPortals = getStarPortalScreenTargets(width, height);
+  for (const target of starPortals) {
+    const glow = ctx.createRadialGradient(target.xPx, target.yPx, 2, target.xPx, target.yPx, 26);
+    glow.addColorStop(0, `rgba(${target.color}, 0.95)`);
+    glow.addColorStop(0.35, `rgba(${target.color}, 0.45)`);
+    glow.addColorStop(1, `rgba(${target.color}, 0)`);
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(target.xPx, target.yPx, 26, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = `rgba(${target.color}, 0.95)`;
+    ctx.beginPath();
+    ctx.arc(target.xPx, target.yPx, 2.7, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.font = '600 11px "Rajdhani", sans-serif';
+    ctx.fillStyle = `rgba(${target.color}, 0.9)`;
+    ctx.fillText(target.label, target.xPx + 8, target.yPx - 8);
+  }
 
   const orbitGlow = ctx.createRadialGradient(cx, cy, radius * 1.2, cx, cy, radius * 2.25);
   orbitGlow.addColorStop(0, "rgba(49, 114, 153, 0.06)");
@@ -1855,6 +1892,22 @@ function updateHoverCoordinate(clientX, clientY) {
   updateStatusBar();
 }
 
+function selectStarPortalAt(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const x = clientX - rect.left;
+  const y = clientY - rect.top;
+  const targets = getStarPortalScreenTargets(rect.width, rect.height);
+
+  for (const target of targets) {
+    if (Math.hypot(x - target.xPx, y - target.yPx) <= target.hitRadius) {
+      setPlanet(target.key);
+      newRound();
+      return true;
+    }
+  }
+  return false;
+}
+
 function handlePointerDown(event) {
   state.dragging = true;
   canvas.classList.add("dragging");
@@ -1890,6 +1943,9 @@ function handlePointerUp(event) {
   state.dragging = false;
   canvas.classList.remove("dragging");
   if (clickLike && event && typeof event.clientX === "number") {
+    if (selectStarPortalAt(event.clientX, event.clientY)) {
+      return;
+    }
     if (registerImpact(event.clientX, event.clientY)) {
       addLog("충돌 이펙트 생성.");
       drawGlobe();
