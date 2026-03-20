@@ -940,7 +940,7 @@ function getPlanetTextureSettings(planet) {
     return { latStep: 0.62, lonStep: 0.62, pointSize: 0.52, cloudStep: 1.18 };
   }
   if (planet.style === "earth") {
-    return { latStep: 0.48, lonStep: 0.48, pointSize: 0.44, cloudStep: 0.94 };
+    return { latStep: 0.38, lonStep: 0.38, pointSize: 0.4, cloudStep: 0.82 };
   }
   return { latStep: 0.56, lonStep: 0.56, pointSize: 0.48, cloudStep: 1.02 };
 }
@@ -996,7 +996,7 @@ function drawPlanetTexture(cx, cy, radius, sun, nowMs, planet) {
 }
 
 function drawEarthContinents(cx, cy, radius, nowMs) {
-  const segments = state.lowPerf ? 96 : 180;
+  const segments = state.lowPerf ? 128 : 260;
   for (const blob of CONTINENT_BLOBS) {
     const p = rotateVec(latLonToVec(blob.lat, blob.lon));
     if (p.z <= -0.04) continue;
@@ -1011,9 +1011,10 @@ function drawEarthContinents(cx, cy, radius, nowMs) {
     for (let i = 0; i <= segments; i += 1) {
       const t = (i / segments) * Math.PI * 2;
       const n =
-        Math.sin(t * 2.7 + blob.lon * 0.04 + nowMs * 0.00006) * 0.09 +
-        Math.cos(t * 5.1 + blob.lat * 0.05) * 0.06 +
-        Math.sin(t * 8.3 + blob.rx * 0.08) * 0.03;
+        Math.sin(t * 2.7 + blob.lon * 0.04 + nowMs * 0.00006) * 0.08 +
+        Math.cos(t * 5.1 + blob.lat * 0.05) * 0.055 +
+        Math.sin(t * 8.3 + blob.rx * 0.08) * 0.025 +
+        Math.cos(t * 12.2 + blob.ry * 0.06) * 0.018;
       const px = x + Math.cos(t) * rx * (1 + n);
       const py = y + Math.sin(t) * ry * (1 + n * 0.7);
       if (i === 0) ctx.moveTo(px, py);
