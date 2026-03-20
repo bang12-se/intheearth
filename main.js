@@ -43,6 +43,10 @@ const infoGravityEl = document.getElementById("info-gravity");
 const infoDayEl = document.getElementById("info-day");
 const infoYearEl = document.getElementById("info-year");
 const infoMoonsEl = document.getElementById("info-moons");
+const planetFeatureTitleEl = document.getElementById("planet-feature-title");
+const planetFeatureIntroEl = document.getElementById("planet-feature-intro");
+const planetFactListEl = document.getElementById("planet-fact-list");
+const planetFeatureSectionsEl = document.getElementById("planet-feature-sections");
 
 const dpr = window.devicePixelRatio || 1;
 const RENDER_THEME = "solar-smash";
@@ -236,6 +240,179 @@ const PLANET_INFO = {
   uranus: { type: "Ice Giant", gravity: "8.69 m/s²", day: "17.2 h", year: "84 y", moons: "27" },
   neptune: { type: "Ice Giant", gravity: "11.2 m/s²", day: "16.1 h", year: "164.8 y", moons: "14" },
   pluto: { type: "Dwarf Planet", gravity: "0.62 m/s²", day: "6.4 d", year: "248 y", moons: "5" }
+};
+
+const PLANET_FEATURE_CONTENT = {
+  sun: {
+    title: "태양의 특징",
+    intro: "태양은 태양계 질량의 대부분을 차지하는 G형 주계열성으로, 핵융합으로 막대한 에너지를 방출합니다.",
+    facts: [
+      ["평균 반지름", "696,340 km"],
+      ["표면 온도", "약 5,500°C"],
+      ["중심 온도", "약 1,500만°C"],
+      ["주성분", "수소, 헬륨"],
+      ["자전 주기", "약 25~35일"],
+      ["행성 수", "8개" ]
+    ],
+    sections: [
+      { title: "에너지 생성", bullets: ["중심부에서 수소 핵융합이 일어나 빛과 열을 생성합니다.", "복사층과 대류층을 거쳐 에너지가 표면으로 전달됩니다.", "태양 활동 주기에 따라 방출 에너지와 자기 활동이 변합니다."] },
+      { title: "표면 활동", bullets: ["흑점은 강한 자기장으로 주변보다 온도가 낮아 어둡게 보입니다.", "홍염과 플레어는 단시간에 큰 에너지를 방출할 수 있습니다.", "코로나 질량 방출은 우주 기상과 지구 자기권에 영향을 줍니다."] },
+      { title: "관측 포인트", bullets: ["태양 관측은 전용 필터 장비를 통해 안전하게 수행해야 합니다.", "파장대별 관측으로 플라즈마 구조를 더 정밀하게 볼 수 있습니다.", "행성 탐사 임무의 전력과 통신 환경에도 태양 조건이 중요합니다."] }
+    ]
+  },
+  mercury: {
+    title: "수성의 특징",
+    intro: "수성은 태양에 가장 가까운 암석 행성으로, 대기가 매우 희박하고 표면 온도 변화가 극단적입니다.",
+    facts: [
+      ["평균 반지름", "2,440 km"],
+      ["표면 중력", "3.7 m/s²"],
+      ["대기", "매우 희박한 외기권"],
+      ["자전 주기", "58.6일"],
+      ["공전 주기", "88일"],
+      ["위성", "0개"]
+    ],
+    sections: [
+      { title: "표면 환경", bullets: ["대기가 거의 없어 운석 충돌 흔적이 오래 보존됩니다.", "낮과 밤의 표면 온도 차이가 매우 큽니다.", "극지 음영 지역에는 얼음 존재 가능성이 보고됩니다."] },
+      { title: "내부 구조", bullets: ["행성 크기 대비 금속 핵 비율이 큰 편으로 추정됩니다.", "자기장을 보유해 태양풍과 상호작용합니다.", "지질 수축 흔적이 절벽 형태로 관측됩니다."] },
+      { title: "탐사 포인트", bullets: ["BepiColombo 임무가 궤도 진입 후 정밀 관측을 수행 중입니다.", "극지 충돌구와 화학 조성 분석이 핵심 과제입니다.", "태양 근접 환경에서의 열 설계 기술 검증에 중요합니다."] }
+    ]
+  },
+  venus: {
+    title: "금성의 특징",
+    intro: "금성은 두꺼운 이산화탄소 대기와 강한 온실효과로 태양계에서 가장 뜨거운 표면 환경을 가집니다.",
+    facts: [
+      ["평균 반지름", "6,052 km"],
+      ["표면 중력", "8.87 m/s²"],
+      ["대기 압력", "지구의 약 92배"],
+      ["주요 구름", "황산 에어로졸"],
+      ["자전 주기", "243일(역행)"],
+      ["공전 주기", "225일"]
+    ],
+    sections: [
+      { title: "대기 특성", bullets: ["두꺼운 CO2 대기가 열을 가둬 평균 고온을 유지합니다.", "상층 대기는 초고속 바람으로 행성 전체를 빠르게 순환합니다.", "황산 구름층이 가시광 관측을 어렵게 만듭니다."] },
+      { title: "표면 지형", bullets: ["광범위한 화산 지형과 평원이 확인됩니다.", "판 구조 운동은 지구와 다른 방식으로 작동한 것으로 보입니다.", "최근 화산 활동 가능성을 시사하는 관측이 보고됩니다."] },
+      { title: "탐사 포인트", bullets: ["레이더 관측이 지형 분석의 핵심 수단입니다.", "대기 탐사선은 고온·고압 환경 내구성이 중요합니다.", "지구 기후 연구를 위한 온실효과 비교 대상으로 가치가 큽니다."] }
+    ]
+  },
+  earth: {
+    title: "지구의 특징",
+    intro: "지구는 태양계에서 액체 상태의 물, 안정적인 대기, 강한 자기권이 함께 존재하는 매우 드문 행성입니다.",
+    facts: [
+      ["평균 반지름", "6,371 km"],
+      ["표면 중력", "9.8 m/s²"],
+      ["표면 해양 비율", "약 71%"],
+      ["대기 주성분", "질소 78%, 산소 21%"],
+      ["자전 주기", "약 24시간"],
+      ["공전 주기", "약 365일"]
+    ],
+    sections: [
+      { title: "표면과 내부 구조", bullets: ["지각, 맨틀, 외핵, 내핵으로 이루어진 층상 구조를 가집니다.", "판 구조 운동으로 산맥 형성, 화산 활동, 지진이 발생합니다.", "대륙과 해양이 공존해 다양한 기후대를 형성합니다."] },
+      { title: "대기와 기후 시스템", bullets: ["질소-산소 중심 대기가 온도와 조성을 안정화합니다.", "수증기, 구름, 강수 순환이 물의 재분배를 담당합니다.", "자전축 기울기(약 23.5도)로 계절 변화가 나타납니다."] },
+      { title: "생명 유지 요인", bullets: ["자기장이 태양풍으로부터 대기와 지표를 보호합니다.", "달의 중력이 조석과 자전축 안정성에 영향을 줍니다.", "탄소·물·질소 순환이 장기적 생태 균형을 뒷받침합니다."] }
+    ]
+  },
+  mars: {
+    title: "화성의 특징",
+    intro: "화성은 과거 물의 흔적이 남아 있는 건조한 암석 행성으로, 생명 가능성 탐사의 핵심 목표입니다.",
+    facts: [
+      ["평균 반지름", "3,390 km"],
+      ["표면 중력", "3.71 m/s²"],
+      ["대기", "희박한 CO2 중심"],
+      ["자전 주기", "24.6시간"],
+      ["공전 주기", "687일"],
+      ["위성", "2개"]
+    ],
+    sections: [
+      { title: "지형 특성", bullets: ["태양계 최대 화산(올림푸스 몬스)과 거대 협곡이 존재합니다.", "고대 하천·삼각주 흔적으로 과거 액체 물 흐름이 추정됩니다.", "극관의 계절 변화가 대기 순환과 연결됩니다."] },
+      { title: "환경 조건", bullets: ["대기가 희박해 방사선 차폐 효과가 제한적입니다.", "미세먼지 폭풍이 전 지구 규모로 발생할 수 있습니다.", "낮밤 기온 차가 매우 큰 편입니다."] },
+      { title: "탐사 포인트", bullets: ["로버와 궤도선이 퇴적층과 유기물 흔적을 조사합니다.", "시료 귀환 임무는 과거 생명 흔적 검증의 핵심입니다.", "장기적으로 유인 탐사 기반 구축 대상입니다."] }
+    ]
+  },
+  jupiter: {
+    title: "목성의 특징",
+    intro: "목성은 태양계 최대 가스 행성으로, 강력한 자기장과 복잡한 대기 밴드 구조를 보여줍니다.",
+    facts: [
+      ["평균 반지름", "69,911 km"],
+      ["표면 중력", "24.8 m/s²"],
+      ["대기 주성분", "수소, 헬륨"],
+      ["자전 주기", "약 9.9시간"],
+      ["공전 주기", "11.86년"],
+      ["위성", "95개 이상"]
+    ],
+    sections: [
+      { title: "대기 역학", bullets: ["밝고 어두운 밴드가 제트기류에 따라 형성됩니다.", "대적점은 수세기 이상 지속된 거대 폭풍으로 알려져 있습니다.", "상층 대기는 암모니아 얼음 구름을 포함합니다."] },
+      { title: "자기장과 복사", bullets: ["매우 강한 자기권이 넓은 범위를 지배합니다.", "고에너지 복사 환경이 강해 탐사선 차폐가 중요합니다.", "오로라 활동이 극지에서 강하게 관측됩니다."] },
+      { title: "위성 시스템", bullets: ["갈릴레이 위성은 내부 바다와 화산 활동 등 다양한 특성을 가집니다.", "유로파는 얼음 아래 바다 가능성으로 주목받습니다.", "목성계는 행성 형성 연구의 핵심 실험실입니다."] }
+    ]
+  },
+  saturn: {
+    title: "토성의 특징",
+    intro: "토성은 뚜렷한 고리 구조로 유명한 가스 행성으로, 위성계 또한 매우 다양하고 역동적입니다.",
+    facts: [
+      ["평균 반지름", "58,232 km"],
+      ["표면 중력", "10.4 m/s²"],
+      ["대기 주성분", "수소, 헬륨"],
+      ["자전 주기", "약 10.7시간"],
+      ["공전 주기", "29.4년"],
+      ["위성", "140개 이상"]
+    ],
+    sections: [
+      { title: "고리 구조", bullets: ["고리는 얼음과 암석 입자로 구성된 얇은 원반입니다.", "여러 띠와 간극이 위성 중력과 상호작용하며 형성됩니다.", "입자 크기 분포와 파동 구조가 지속적으로 변화합니다."] },
+      { title: "대기와 계절", bullets: ["상층 대기 제트기류와 폭풍 패턴이 관측됩니다.", "장주기 공전으로 계절 변화가 느리게 진행됩니다.", "북극 육각형 제트 구조는 대표적인 대기 현상입니다."] },
+      { title: "주요 위성", bullets: ["타이탄은 두꺼운 대기와 메탄 순환을 가진 독특한 위성입니다.", "엔셀라두스는 얼음 분출로 지하 바다 가능성을 보여줍니다.", "토성계는 생명 가능성 탐사 후보지를 다수 포함합니다."] }
+    ]
+  },
+  uranus: {
+    title: "천왕성의 특징",
+    intro: "천왕성은 자전축이 크게 기울어진 얼음 거대행성으로, 독특한 계절과 대기 순환을 보입니다.",
+    facts: [
+      ["평균 반지름", "25,362 km"],
+      ["표면 중력", "8.69 m/s²"],
+      ["대기 주성분", "수소, 헬륨, 메탄"],
+      ["자전 주기", "17.2시간"],
+      ["공전 주기", "84년"],
+      ["위성", "27개"]
+    ],
+    sections: [
+      { title: "축 기울기", bullets: ["자전축이 약 98도 기울어 거의 옆으로 누운 상태로 공전합니다.", "한 극이 오랜 기간 햇빛을 받거나 받지 않는 계절 패턴이 나타납니다.", "이 특성은 대기 순환 모델 연구에 중요한 사례입니다."] },
+      { title: "대기 특성", bullets: ["메탄이 적색 파장을 흡수해 청록색으로 보입니다.", "상층 구름과 바람 구조가 적외선 관측에서 포착됩니다.", "내부 열 방출이 상대적으로 약한 편으로 알려져 있습니다."] },
+      { title: "탐사 포인트", bullets: ["근접 탐사 데이터가 제한적이라 신규 임무 가치가 큽니다.", "고리와 위성의 상호작용 관측이 중요 과제입니다.", "얼음 거대행성 형성 시나리오 검증에 핵심 대상입니다."] }
+    ]
+  },
+  neptune: {
+    title: "해왕성의 특징",
+    intro: "해왕성은 강한 바람과 역동적인 기상 구조를 가진 얼음 거대행성으로, 태양계 외곽의 대표 천체입니다.",
+    facts: [
+      ["평균 반지름", "24,622 km"],
+      ["표면 중력", "11.2 m/s²"],
+      ["대기 주성분", "수소, 헬륨, 메탄"],
+      ["자전 주기", "16.1시간"],
+      ["공전 주기", "164.8년"],
+      ["위성", "14개"]
+    ],
+    sections: [
+      { title: "기상 활동", bullets: ["태양계에서 가장 빠른 수준의 바람이 관측됩니다.", "짙은 반점 형태의 대형 폭풍 구조가 주기적으로 나타납니다.", "고층 구름과 밴드가 시간에 따라 빠르게 변합니다."] },
+      { title: "내부와 자기장", bullets: ["얼음·암석 중심과 두꺼운 맨틀 구조가 추정됩니다.", "자기장은 자전축 대비 크게 기울어진 비대칭 구조를 보입니다.", "내부 열 방출이 대기 역학을 강화하는 요인으로 여겨집니다."] },
+      { title: "탐사 포인트", bullets: ["트리톤 위성은 포획 기원 가능성으로 중요합니다.", "원거리 환경에서의 대기 에너지 전달 메커니즘 연구가 필요합니다.", "심우주 장기 임무 기술 검증 대상입니다."] }
+    ]
+  },
+  pluto: {
+    title: "명왕성의 특징",
+    intro: "명왕성은 왜소행성이지만 지질학적으로 복잡한 표면과 계절성 대기 변화를 보이는 흥미로운 천체입니다.",
+    facts: [
+      ["평균 반지름", "1,188 km"],
+      ["표면 중력", "0.62 m/s²"],
+      ["주요 얼음", "질소, 메탄, 일산화탄소"],
+      ["자전 주기", "6.4일"],
+      ["공전 주기", "248년"],
+      ["위성", "5개"]
+    ],
+    sections: [
+      { title: "표면 특징", bullets: ["심장 모양 영역(스푸트니크 평원)이 대표 지형입니다.", "질소 얼음의 대류 흔적이 관측되어 지질 활동 가능성을 시사합니다.", "지역별 반사율 차이가 매우 커 대비가 뚜렷합니다."] },
+      { title: "대기와 계절", bullets: ["희박한 질소 대기는 태양 거리 변화에 따라 크게 달라집니다.", "장주기 공전으로 계절 변화 주기가 매우 깁니다.", "표면 얼음 승화·응축 과정이 대기와 연결됩니다."] },
+      { title: "탐사 포인트", bullets: ["뉴허라이즌스가 고해상도 근접 자료를 제공했습니다.", "카이퍼 벨트 천체 이해를 위한 기준 사례입니다.", "왜소행성의 지질 다양성을 보여주는 대표 대상입니다."] }
+    ]
+  }
 };
 
 const PLANET_SATELLITES = {
@@ -503,11 +680,51 @@ function updateStatusBar() {
   compassNeedle.style.setProperty("--heading", `${-headingNormalized}deg`);
 }
 
+function renderPlanetFeatureCard() {
+  if (!planetFeatureTitleEl || !planetFeatureIntroEl || !planetFactListEl || !planetFeatureSectionsEl) return;
+
+  const feature = PLANET_FEATURE_CONTENT[state.currentPlanet] || PLANET_FEATURE_CONTENT.earth;
+  planetFeatureTitleEl.textContent = feature.title;
+  planetFeatureIntroEl.textContent = feature.intro;
+
+  planetFactListEl.textContent = "";
+  for (const [label, value] of feature.facts) {
+    const item = document.createElement("div");
+    item.className = "fact-item";
+
+    const span = document.createElement("span");
+    span.textContent = label;
+    const strong = document.createElement("strong");
+    strong.textContent = value;
+
+    item.appendChild(span);
+    item.appendChild(strong);
+    planetFactListEl.appendChild(item);
+  }
+
+  planetFeatureSectionsEl.textContent = "";
+  for (const section of feature.sections) {
+    const h3 = document.createElement("h3");
+    h3.textContent = section.title;
+
+    const ul = document.createElement("ul");
+    for (const bullet of section.bullets) {
+      const li = document.createElement("li");
+      li.textContent = bullet;
+      ul.appendChild(li);
+    }
+
+    planetFeatureSectionsEl.appendChild(h3);
+    planetFeatureSectionsEl.appendChild(ul);
+  }
+}
+
 function applyPlanetInfo() {
   const planet = getCurrentPlanet();
   if (missionTitleEl) missionTitleEl.textContent = planet.title;
   if (missionSubEl) missionSubEl.textContent = planet.subtitle;
   updatePlanetInfoPanel();
+  renderPlanetFeatureCard();
 }
 
 function updatePlanetInfoPanel() {
