@@ -99,8 +99,17 @@ const state = {
 };
 
 const STAR_PORTAL_TARGETS = [
-  { key: "sirius", label: "Sirius A", x: 0.86, y: 0.18, color: "169, 220, 255" },
-  { key: "proxima", label: "Proxima", x: 0.13, y: 0.8, color: "255, 155, 122" }
+  { key: "sirius", label: "Sirius", x: 0.86, y: 0.18, color: "169, 220, 255" },
+  { key: "proxima", label: "Proxima", x: 0.13, y: 0.8, color: "255, 155, 122" },
+  { key: "vega", label: "Vega", x: 0.74, y: 0.12, color: "162, 206, 255" },
+  { key: "arcturus", label: "Arcturus", x: 0.82, y: 0.72, color: "255, 181, 118" },
+  { key: "betelgeuse", label: "Betelgeuse", x: 0.24, y: 0.22, color: "255, 133, 104" },
+  { key: "rigel", label: "Rigel", x: 0.58, y: 0.26, color: "176, 216, 255" },
+  { key: "aldebaran", label: "Aldebaran", x: 0.3, y: 0.64, color: "255, 163, 112" },
+  { key: "altair", label: "Altair", x: 0.63, y: 0.84, color: "202, 232, 255" },
+  { key: "deneb", label: "Deneb", x: 0.5, y: 0.1, color: "195, 226, 255" },
+  { key: "spica", label: "Spica", x: 0.93, y: 0.48, color: "184, 219, 255" },
+  { key: "antares", label: "Antares", x: 0.07, y: 0.56, color: "255, 124, 96" }
 ];
 
 function getStarPortalScreenTargets(width, height) {
@@ -150,6 +159,114 @@ const PLANET_PRESETS = {
     halo: ["rgba(255, 138, 104, 0.3)", "rgba(255, 138, 104, 0)"],
     ring: null,
     marker: "#ffb39a"
+  },
+  vega: {
+    label: "Vega",
+    title: "Vega Stellar View",
+    subtitle: "청백색 항성 베가의 고온 광구를 시각화합니다.",
+    altitudeBase: 1630000,
+    spinSpeed: 0.00016,
+    cloudSpeed: 0.00145,
+    style: "sun",
+    halo: ["rgba(174, 224, 255, 0.3)", "rgba(174, 224, 255, 0)"],
+    ring: null,
+    marker: "#bde2ff"
+  },
+  arcturus: {
+    label: "Arcturus",
+    title: "Arcturus Giant Star View",
+    subtitle: "주황색 거성 아크투루스의 외곽층을 관측합니다.",
+    altitudeBase: 1770000,
+    spinSpeed: 0.00014,
+    cloudSpeed: 0.00135,
+    style: "sun",
+    halo: ["rgba(255, 181, 122, 0.32)", "rgba(255, 181, 122, 0)"],
+    ring: null,
+    marker: "#ffcc9f"
+  },
+  betelgeuse: {
+    label: "Betelgeuse",
+    title: "Betelgeuse Red Supergiant",
+    subtitle: "적색 초거성의 거대한 대류 셀을 관측합니다.",
+    altitudeBase: 53000000,
+    spinSpeed: 0.0001,
+    cloudSpeed: 0.00195,
+    style: "sun",
+    halo: ["rgba(255, 122, 96, 0.34)", "rgba(255, 122, 96, 0)"],
+    ring: null,
+    marker: "#ff9e84"
+  },
+  rigel: {
+    label: "Rigel",
+    title: "Rigel Blue Supergiant",
+    subtitle: "고온 청색 초거성의 강한 복사를 시각화합니다.",
+    altitudeBase: 55000000,
+    spinSpeed: 0.00012,
+    cloudSpeed: 0.0017,
+    style: "sun",
+    halo: ["rgba(156, 206, 255, 0.34)", "rgba(156, 206, 255, 0)"],
+    ring: null,
+    marker: "#a7d7ff"
+  },
+  aldebaran: {
+    label: "Aldebaran",
+    title: "Aldebaran Orange Giant",
+    subtitle: "황소자리의 주황색 거성 알데바란을 관측합니다.",
+    altitudeBase: 3120000,
+    spinSpeed: 0.00013,
+    cloudSpeed: 0.0014,
+    style: "sun",
+    halo: ["rgba(255, 171, 108, 0.3)", "rgba(255, 171, 108, 0)"],
+    ring: null,
+    marker: "#ffc08f"
+  },
+  altair: {
+    label: "Altair",
+    title: "Altair Rapid Spinner",
+    subtitle: "빠른 자전으로 납작해진 고온 항성 알타이르를 관측합니다.",
+    altitudeBase: 1250000,
+    spinSpeed: 0.00028,
+    cloudSpeed: 0.00155,
+    style: "sun",
+    halo: ["rgba(194, 228, 255, 0.3)", "rgba(194, 228, 255, 0)"],
+    ring: null,
+    marker: "#d2ecff"
+  },
+  deneb: {
+    label: "Deneb",
+    title: "Deneb Luminous Star",
+    subtitle: "매우 높은 광도를 가진 데네브의 상층 대기를 시각화합니다.",
+    altitudeBase: 141000000,
+    spinSpeed: 0.0001,
+    cloudSpeed: 0.0015,
+    style: "sun",
+    halo: ["rgba(192, 225, 255, 0.33)", "rgba(192, 225, 255, 0)"],
+    ring: null,
+    marker: "#cfe8ff"
+  },
+  spica: {
+    label: "Spica",
+    title: "Spica Binary Star",
+    subtitle: "청백색 쌍성 스피카의 복합 광도를 시각화합니다.",
+    altitudeBase: 5200000,
+    spinSpeed: 0.00018,
+    cloudSpeed: 0.0015,
+    style: "sun",
+    halo: ["rgba(178, 216, 255, 0.32)", "rgba(178, 216, 255, 0)"],
+    ring: null,
+    marker: "#bde1ff"
+  },
+  antares: {
+    label: "Antares",
+    title: "Antares Red Supergiant",
+    subtitle: "강한 적색 광도를 보이는 초거성 안타레스를 관측합니다.",
+    altitudeBase: 47300000,
+    spinSpeed: 0.00011,
+    cloudSpeed: 0.00185,
+    style: "sun",
+    halo: ["rgba(255, 118, 96, 0.35)", "rgba(255, 118, 96, 0)"],
+    ring: null,
+    marker: "#ff9a86"
   },
   mercury: {
     label: "Mercury",
@@ -273,6 +390,15 @@ const PLANET_INFO = {
   sun: { type: "G-type Star", gravity: "274 m/s²", day: "25-35 d", year: "-", moons: "0" },
   sirius: { type: "A-type Main-sequence Star", gravity: "-", day: "~5 d", year: "-", moons: "0" },
   proxima: { type: "M-type Red Dwarf", gravity: "-", day: "~83 d", year: "-", moons: "0" },
+  vega: { type: "A-type Main-sequence Star", gravity: "-", day: "~0.7 d", year: "-", moons: "0" },
+  arcturus: { type: "K-type Giant Star", gravity: "-", day: "~730 d", year: "-", moons: "0" },
+  betelgeuse: { type: "Red Supergiant", gravity: "-", day: "~2000 d", year: "-", moons: "0" },
+  rigel: { type: "Blue Supergiant", gravity: "-", day: "~25 d", year: "-", moons: "0" },
+  aldebaran: { type: "K-type Giant Star", gravity: "-", day: "~520 d", year: "-", moons: "0" },
+  altair: { type: "A-type Main-sequence Star", gravity: "-", day: "~0.4 d", year: "-", moons: "0" },
+  deneb: { type: "A-type Supergiant", gravity: "-", day: "~100 d", year: "-", moons: "0" },
+  spica: { type: "B-type Binary System", gravity: "-", day: "~4 d", year: "-", moons: "0" },
+  antares: { type: "Red Supergiant", gravity: "-", day: "~1650 d", year: "-", moons: "0" },
   mercury: { type: "Rocky Planet", gravity: "3.7 m/s²", day: "58.6 d", year: "88 d", moons: "0" },
   venus: { type: "Rocky Planet", gravity: "8.87 m/s²", day: "243 d", year: "225 d", moons: "0" },
   earth: { type: "Rocky Planet", gravity: "9.8 m/s²", day: "24 h", year: "365 d", moons: "1" },
@@ -288,6 +414,15 @@ const PLANET_MOON_LIST = {
   sun: ["수성", "금성", "지구", "화성", "목성", "토성", "천왕성", "해왕성"],
   sirius: ["확인된 행성 없음"],
   proxima: ["프록시마 b", "프록시마 d"],
+  vega: ["확인된 행성 없음"],
+  arcturus: ["확인된 행성 없음"],
+  betelgeuse: ["확인된 행성 없음"],
+  rigel: ["Rigel B"],
+  aldebaran: ["확인된 행성 없음"],
+  altair: ["확인된 행성 없음"],
+  deneb: ["확인된 행성 없음"],
+  spica: ["Spica B"],
+  antares: ["Antares B"],
   mercury: [],
   venus: [],
   earth: ["달"],
@@ -349,6 +484,96 @@ const PLANET_FEATURE_CONTENT = {
       { title: "항성 성격", bullets: ["낮은 질량과 낮은 온도를 가진 적색왜성으로 수명이 매우 깁니다.", "자기 활동이 강해 플레어가 자주 발생하는 편입니다.", "저광도 별이지만 근거리라 외계행성 연구에서 중요합니다."] },
       { title: "행성계", bullets: ["프록시마 b는 거주가능영역 근처를 도는 암석형 행성 후보로 주목받습니다.", "근접 공전 행성들은 항성 플레어의 영향을 크게 받을 수 있습니다.", "대기 유지 가능성과 표면 환경은 활발한 연구 주제입니다."] },
       { title: "과학적 가치", bullets: ["가장 가까운 항성계라 차세대 직접관측 목표 1순위 중 하나입니다.", "적색왜성 주변 생명 거주 가능성 평가의 핵심 기준 천체입니다.", "심우주 탐사 개념 연구(광돛 등)에서 자주 가정되는 목적지입니다."] }
+    ]
+  },
+  vega: {
+    title: "베가의 특징",
+    intro: "베가는 여름철 삼각형의 대표 항성으로, 고온의 청백색 A형 주계열성입니다.",
+    facts: [["분광형", "A0V"], ["거리", "약 25광년"], ["질량", "태양의 약 2.1배"], ["광도", "태양의 약 40배"], ["표면 온도", "약 9,600K"], ["회전", "매우 빠름"]],
+    sections: [
+      { title: "복사 특성", bullets: ["고온 광구로 청백색 스펙트럼이 두드러집니다.", "적외선 관측에서 원반 구조 단서가 보고되었습니다.", "표준 밝기 교정 별로 자주 활용됩니다."] },
+      { title: "자전", bullets: ["빠른 자전으로 적도 팽창이 관측됩니다.", "중력 암흑화 현상 연구 사례로 중요합니다.", "극/적도 온도 차이 모델 검증에 쓰입니다."] },
+      { title: "관측 포인트", bullets: ["여름철 북반구에서 식별이 쉽습니다.", "백조자리 데네브, 독수리자리 알타이르와 삼각형을 이룹니다.", "아마추어 관측과 교육용으로 활용도가 높습니다."] }
+    ]
+  },
+  arcturus: {
+    title: "아크투루스의 특징",
+    intro: "아크투루스는 오렌지색으로 보이는 K형 거성으로, 봄철 하늘에서 매우 밝게 관측됩니다.",
+    facts: [["분광형", "K1.5III"], ["거리", "약 37광년"], ["질량", "태양의 약 1.1배"], ["반지름", "태양의 약 25배"], ["광도", "태양의 약 170배"], ["색", "주황색"]],
+    sections: [
+      { title: "진화 단계", bullets: ["주계열 단계를 지나 거성 단계에 들어선 항성입니다.", "표면 온도는 태양보다 낮지만 반지름이 커 총광도는 큽니다.", "향후 진화 경로 연구의 대표 샘플입니다."] },
+      { title: "운동 특성", bullets: ["고유운동이 큰 밝은 별로 알려져 있습니다.", "은하 내 별 집단 운동 연구에도 자주 활용됩니다.", "근처 항성 흐름 분석의 기준점 역할을 합니다."] },
+      { title: "관측 포인트", bullets: ["북두칠성 손잡이 곡선을 따라 찾기 쉽습니다.", "봄철 남중 시 식별성이 매우 뛰어납니다.", "색 대비가 뚜렷해 육안 관측에도 유리합니다."] }
+    ]
+  },
+  betelgeuse: {
+    title: "베텔게우스의 특징",
+    intro: "베텔게우스는 오리온자리의 적색 초거성으로, 거대한 반지름과 변광 특성으로 유명합니다.",
+    facts: [["분광형", "M1-2Ia-Iab"], ["거리", "약 550광년"], ["반지름", "태양의 수백 배"], ["광도", "태양의 수만 배"], ["표면 온도", "약 3,500K"], ["특성", "반규칙 변광성"]],
+    sections: [
+      { title: "초거성 구조", bullets: ["대기와 외곽층이 매우 확장되어 있습니다.", "대류 셀 규모가 거대해 밝기 변동이 큽니다.", "질량 손실과 먼지 방출이 활발합니다."] },
+      { title: "변광", bullets: ["관측 시기마다 밝기 변화가 크게 나타납니다.", "광도 하강 이벤트는 세계적으로 큰 관심을 받았습니다.", "변광 메커니즘 연구의 핵심 대상입니다."] },
+      { title: "관측 포인트", bullets: ["오리온자리 어깨 별로 쉽게 찾을 수 있습니다.", "리겔과 색 대비가 뚜렷합니다.", "장기 광도 모니터링에 적합한 대상입니다."] }
+    ]
+  },
+  rigel: {
+    title: "리겔의 특징",
+    intro: "리겔은 오리온자리의 청색 초거성으로, 높은 표면 온도와 강한 자외선 복사를 보입니다.",
+    facts: [["분광형", "B8Ia"], ["거리", "약 860광년"], ["광도", "태양의 수만 배"], ["표면 온도", "약 12,000K"], ["동반성", "Rigel B"], ["색", "청백색"]],
+    sections: [
+      { title: "복사와 온도", bullets: ["청색 초거성이라 고온 스펙트럼이 뚜렷합니다.", "자외선 복사가 강해 주변 성간물질에 영향 줍니다.", "질량이 큰 항성 진화 연구에 핵심입니다."] },
+      { title: "쌍성계", bullets: ["망원경으로 동반성 Rigel B 분리가 가능합니다.", "다중성계 동역학 연구에 참고됩니다.", "밝은 주성과 어두운 동반성 대비가 큽니다."] },
+      { title: "관측 포인트", bullets: ["오리온자리 발끝 위치의 대표 별입니다.", "겨울철 남쪽 하늘에서 관측이 쉽습니다.", "베텔게우스와 함께 오리온의 색 대비를 보여줍니다."] }
+    ]
+  },
+  aldebaran: {
+    title: "알데바란의 특징",
+    intro: "알데바란은 황소자리의 주황색 거성으로, 히아데스 성단 앞쪽에 위치해 보입니다.",
+    facts: [["분광형", "K5III"], ["거리", "약 65광년"], ["반지름", "태양의 약 44배"], ["광도", "태양의 약 400배"], ["표면 온도", "약 3,900K"], ["색", "주황색"]],
+    sections: [
+      { title: "거성 특성", bullets: ["차가운 표면 온도로 붉은 기운이 강합니다.", "큰 반지름 때문에 육안 밝기가 큽니다.", "거성 대기 구조 연구 대상입니다."] },
+      { title: "위치 특징", bullets: ["히아데스 성단과 시선상 가깝게 보입니다.", "실제론 성단 구성원이 아닌 전경 별입니다.", "천구 좌표 학습용 기준점으로 자주 씁니다."] },
+      { title: "관측 포인트", bullets: ["가을~겨울철 동쪽 하늘에서 쉽게 식별됩니다.", "붉은 색감이 육안에서도 비교적 뚜렷합니다.", "달과의 접근 이벤트 관측 대상입니다."] }
+    ]
+  },
+  altair: {
+    title: "알타이르의 특징",
+    intro: "알타이르는 빠르게 자전하는 A형 주계열성으로, 적도 팽창이 관측된 대표 별입니다.",
+    facts: [["분광형", "A7V"], ["거리", "약 17광년"], ["질량", "태양의 약 1.8배"], ["자전", "매우 빠름"], ["표면 온도", "약 7,600K"], ["특징", "중력 암흑화"]],
+    sections: [
+      { title: "자전 효과", bullets: ["빠른 자전으로 구형이 아닌 납작한 형태를 보입니다.", "극이 적도보다 밝고 뜨거운 분포를 가집니다.", "간섭계 관측으로 형상이 직접 확인되었습니다."] },
+      { title: "물리 특성", bullets: ["주계열 단계에서 활발한 복사를 보입니다.", "중간 질량 별 진화 비교군으로 자주 쓰입니다.", "베가·데네브와 함께 여름철 삼각형을 이룹니다."] },
+      { title: "관측 포인트", bullets: ["여름철 남동쪽 하늘에서 매우 눈에 띕니다.", "주변 별자리 추적의 기준 별로 유용합니다.", "광도 변화 장기 모니터링 대상입니다."] }
+    ]
+  },
+  deneb: {
+    title: "데네브의 특징",
+    intro: "데네브는 매우 높은 광도를 가진 A형 초거성으로, 백조자리의 대표 항성입니다.",
+    facts: [["분광형", "A2Ia"], ["거리", "약 2,600광년"], ["광도", "태양의 수만~수십만 배"], ["반지름", "태양의 수백 배"], ["표면 온도", "약 8,500K"], ["특징", "고광도 초거성"]],
+    sections: [
+      { title: "고광도", bullets: ["매우 먼 거리에서도 밝게 보일 정도의 높은 절대광도를 가집니다.", "초거성 단계에서 강한 항성풍을 동반합니다.", "대질량 별 진화 말기 연구에 중요합니다."] },
+      { title: "은하 맥락", bullets: ["은하 원반의 젊은 항성 집단 연구와 연계됩니다.", "성간물질 상호작용 추적에 참고됩니다.", "거리 추정 불확실성 자체도 연구 주제입니다."] },
+      { title: "관측 포인트", bullets: ["여름철 삼각형의 북쪽 꼭짓점입니다.", "백조자리 윤곽을 잡는 핵심 별입니다.", "장노출 촬영 시 주변 은하수 배경과 잘 어울립니다."] }
+    ]
+  },
+  spica: {
+    title: "스피카의 특징",
+    intro: "스피카는 처녀자리의 청백색 쌍성계로, 높은 온도와 빠른 공전으로 알려져 있습니다.",
+    facts: [["분광형", "B1III-IV + B2V"], ["거리", "약 250광년"], ["계", "근접 쌍성"], ["공전 주기", "약 4일"], ["표면 온도", "고온"], ["색", "청백색"]],
+    sections: [
+      { title: "쌍성계", bullets: ["두 성분별이 근접해 조석 변형이 나타납니다.", "스펙트럼 관측으로 공전 특성이 정밀 분석됩니다.", "질량 전달 가능성 연구에도 참고됩니다."] },
+      { title: "광도 특성", bullets: ["B형 별 특유의 푸른빛과 강한 복사를 보입니다.", "처녀자리에서 가장 밝은 별 중 하나입니다.", "분광학 실습 대상 별로도 활용됩니다."] },
+      { title: "관측 포인트", bullets: ["봄철 아크투루스에서 곡선을 연장해 찾기 쉽습니다.", "남쪽 하늘에서 고도 확보 시 관측이 안정적입니다.", "쌍성 분광 변화를 추적하기 좋은 대상입니다."] }
+    ]
+  },
+  antares: {
+    title: "안타레스의 특징",
+    intro: "안타레스는 전갈자리의 적색 초거성으로, 강렬한 붉은 색과 큰 반지름으로 유명합니다.",
+    facts: [["분광형", "M1.5Iab-Ib"], ["거리", "약 550광년"], ["반지름", "태양의 수백 배"], ["광도", "태양의 수만 배"], ["표면 온도", "약 3,600K"], ["동반성", "Antares B"]],
+    sections: [
+      { title: "초거성 특성", bullets: ["큰 반지름과 낮은 표면 온도로 붉게 보입니다.", "강한 질량 손실과 복잡한 외곽층 구조를 가집니다.", "진화 말기 대질량 별 연구에 중요합니다."] },
+      { title: "쌍성 동반", bullets: ["청색 동반성 Antares B가 알려져 있습니다.", "밝은 주성 때문에 동반성 관측 난이도가 높습니다.", "고해상도 관측 장비에서 분리 관측됩니다."] },
+      { title: "관측 포인트", bullets: ["여름철 남쪽 하늘의 전갈자리 중심부에서 눈에 띕니다.", "적색 색감이 매우 강해 육안 식별이 쉽습니다.", "달·행성과의 근접 이벤트 관측 대상입니다."] }
     ]
   },
   mercury: {
@@ -519,6 +744,33 @@ const PLANET_SATELLITES = {
   proxima: [
     { name: "Proxima b", orbit: 1.48, size: 0.026, speed: 0.00135, phase: 0.6, color: "#d8b39c", incl: 0.18 },
     { name: "Proxima d", orbit: 1.74, size: 0.02, speed: 0.0019, phase: 2.2, color: "#b98c76", incl: 0.14 }
+  ],
+  vega: [
+    { name: "Dust Belt", orbit: 1.54, size: 0.022, speed: 0.0014, phase: 1.4, color: "#cfe8ff", incl: 0.18 }
+  ],
+  arcturus: [
+    { name: "Arcturus B (candidate)", orbit: 1.68, size: 0.024, speed: 0.0011, phase: 0.5, color: "#ffd2aa", incl: 0.16 }
+  ],
+  betelgeuse: [
+    { name: "Outer Envelope", orbit: 1.8, size: 0.03, speed: 0.0009, phase: 0.3, color: "#ffb29a", incl: 0.22 }
+  ],
+  rigel: [
+    { name: "Rigel B", orbit: 1.58, size: 0.025, speed: 0.0013, phase: 1.2, color: "#bcdfff", incl: 0.17 }
+  ],
+  aldebaran: [
+    { name: "Aldebaran b (candidate)", orbit: 1.62, size: 0.022, speed: 0.00105, phase: 2.1, color: "#ffc7a3", incl: 0.14 }
+  ],
+  altair: [
+    { name: "Rotation Bulge", orbit: 1.52, size: 0.022, speed: 0.0016, phase: 0.9, color: "#d5ecff", incl: 0.2 }
+  ],
+  deneb: [
+    { name: "Stellar Wind Shell", orbit: 1.74, size: 0.026, speed: 0.00095, phase: 2.5, color: "#d6ebff", incl: 0.19 }
+  ],
+  spica: [
+    { name: "Spica B", orbit: 1.5, size: 0.024, speed: 0.0017, phase: 0.7, color: "#c4e2ff", incl: 0.16 }
+  ],
+  antares: [
+    { name: "Antares B", orbit: 1.64, size: 0.024, speed: 0.00125, phase: 1.8, color: "#ffb09b", incl: 0.18 }
   ],
   mercury: [
     { name: "Bepi", orbit: 1.42, size: 0.02, speed: 0.0018, phase: 0.7, color: "#d4d8df", incl: 0.2 }
@@ -824,7 +1076,7 @@ function renderPlanetFeatureCard() {
   planetFeatureSectionsEl.textContent = "";
 
   const moonTitle = document.createElement("h3");
-  moonTitle.textContent = state.currentPlanet === "sun" ? "주요 행성" : "주요 위성";
+  moonTitle.textContent = getCurrentPlanet().style === "sun" ? "주요 천체" : "주요 위성";
   planetFeatureSectionsEl.appendChild(moonTitle);
 
   const moonList = document.createElement("ul");
@@ -1777,7 +2029,10 @@ function setPlanet(nextPlanet, silent = false) {
   if (!PLANET_PRESETS[key]) return;
   state.currentPlanet = key;
   if (planetSelectEl && planetSelectEl.value !== key) {
-    planetSelectEl.value = key;
+    const hasOption = Boolean(planetSelectEl.querySelector(`option[value="${key}"]`));
+    if (hasOption) {
+      planetSelectEl.value = key;
+    }
   }
   state.impacts = [];
   applyPlanetInfo();
