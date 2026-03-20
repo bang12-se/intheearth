@@ -111,6 +111,30 @@ const PLANET_PRESETS = {
     ring: null,
     marker: "#ffd58b"
   },
+  sirius: {
+    label: "Sirius A",
+    title: "Sirius Stellar View",
+    subtitle: "밤하늘에서 가장 밝은 항성의 복사 특성을 시각화합니다.",
+    altitudeBase: 1189640,
+    spinSpeed: 0.00018,
+    cloudSpeed: 0.00155,
+    style: "sun",
+    halo: ["rgba(174, 214, 255, 0.3)", "rgba(174, 214, 255, 0)"],
+    ring: null,
+    marker: "#c9e7ff"
+  },
+  proxima: {
+    label: "Proxima Centauri",
+    title: "Proxima Red Dwarf Scan",
+    subtitle: "적색왜성의 플레어 활동과 저온 광구를 관찰합니다.",
+    altitudeBase: 107300,
+    spinSpeed: 0.00024,
+    cloudSpeed: 0.0018,
+    style: "sun",
+    halo: ["rgba(255, 138, 104, 0.3)", "rgba(255, 138, 104, 0)"],
+    ring: null,
+    marker: "#ffb39a"
+  },
   mercury: {
     label: "Mercury",
     title: "Mercury Recon Orbit",
@@ -231,6 +255,8 @@ const PLANET_PRESETS = {
 
 const PLANET_INFO = {
   sun: { type: "G-type Star", gravity: "274 m/s²", day: "25-35 d", year: "-", moons: "0" },
+  sirius: { type: "A-type Main-sequence Star", gravity: "-", day: "~5 d", year: "-", moons: "0" },
+  proxima: { type: "M-type Red Dwarf", gravity: "-", day: "~83 d", year: "-", moons: "0" },
   mercury: { type: "Rocky Planet", gravity: "3.7 m/s²", day: "58.6 d", year: "88 d", moons: "0" },
   venus: { type: "Rocky Planet", gravity: "8.87 m/s²", day: "243 d", year: "225 d", moons: "0" },
   earth: { type: "Rocky Planet", gravity: "9.8 m/s²", day: "24 h", year: "365 d", moons: "1" },
@@ -244,6 +270,8 @@ const PLANET_INFO = {
 
 const PLANET_MOON_LIST = {
   sun: ["수성", "금성", "지구", "화성", "목성", "토성", "천왕성", "해왕성"],
+  sirius: ["확인된 행성 없음"],
+  proxima: ["프록시마 b", "프록시마 d"],
   mercury: [],
   venus: [],
   earth: ["달"],
@@ -271,6 +299,40 @@ const PLANET_FEATURE_CONTENT = {
       { title: "에너지 생성", bullets: ["중심부에서 수소 핵융합이 일어나 헬륨으로 바뀌며 에너지를 방출합니다.", "생성된 에너지는 복사층과 대류층을 거쳐 표면으로 이동합니다.", "태양 복사 에너지는 행성 기후와 우주 환경의 기본 에너지원입니다."] },
       { title: "자기 활동", bullets: ["흑점, 플레어, 코로나 질량 방출은 강한 자기장 재연결과 관련됩니다.", "11년 안팎의 태양활동 주기 동안 활동 강도가 변동합니다.", "강한 태양 활동은 인공위성·전력망·통신 시스템에 영향을 줄 수 있습니다."] },
       { title: "관측 가치", bullets: ["태양은 항성 물리학을 검증할 수 있는 가장 가까운 표준 실험실입니다.", "다파장 관측으로 플라즈마, 자기장, 에너지 전달을 정밀 추적합니다.", "우주기상 예측의 정확도 향상을 위해 지속 관측이 필수적입니다."] }
+    ]
+  },
+  sirius: {
+    title: "시리우스의 특징",
+    intro: "시리우스 A는 밤하늘에서 가장 밝게 보이는 항성으로, 태양보다 더 뜨겁고 밝은 A형 주계열성입니다.",
+    facts: [
+      ["분광형", "A1V"],
+      ["거리", "약 8.6광년"],
+      ["질량", "태양의 약 2배"],
+      ["광도", "태양의 약 25배"],
+      ["표면 온도", "약 9,900K"],
+      ["동반성", "백색왜성 시리우스 B"]
+    ],
+    sections: [
+      { title: "밝기 특성", bullets: ["시리우스는 지구에서 관측되는 항성 중 겉보기 밝기가 가장 큽니다.", "고온 광구 때문에 청백색에 가까운 색을 띱니다.", "대기 조건에 따라 깜빡임(대기 산란)이 크게 보입니다."] },
+      { title: "쌍성계", bullets: ["시리우스는 시리우스 A와 백색왜성 시리우스 B로 이루어진 쌍성계입니다.", "시리우스 B는 진화가 끝난 별의 핵이 남은 천체입니다.", "두 별의 공전 분석은 항성 질량 계산의 기준 사례로 자주 쓰입니다."] },
+      { title: "관측 포인트", bullets: ["겨울철 북반구에서 매우 쉽게 찾을 수 있는 대표 항성입니다.", "오리온자리와 큰개자리 별자리 길잡이로 자주 활용됩니다.", "쌍성 운동은 천문 관측 교육용 데이터로도 가치가 높습니다."] }
+    ]
+  },
+  proxima: {
+    title: "프록시마 센타우리의 특징",
+    intro: "프록시마 센타우리는 태양에서 가장 가까운 항성으로, 강한 플레어 활동을 보이는 적색왜성입니다.",
+    facts: [
+      ["분광형", "M5.5Ve"],
+      ["거리", "약 4.24광년"],
+      ["질량", "태양의 약 12%"],
+      ["반지름", "태양의 약 14%"],
+      ["표면 온도", "약 3,000K"],
+      ["확인 행성", "프록시마 b, d"]
+    ],
+    sections: [
+      { title: "항성 성격", bullets: ["낮은 질량과 낮은 온도를 가진 적색왜성으로 수명이 매우 깁니다.", "자기 활동이 강해 플레어가 자주 발생하는 편입니다.", "저광도 별이지만 근거리라 외계행성 연구에서 중요합니다."] },
+      { title: "행성계", bullets: ["프록시마 b는 거주가능영역 근처를 도는 암석형 행성 후보로 주목받습니다.", "근접 공전 행성들은 항성 플레어의 영향을 크게 받을 수 있습니다.", "대기 유지 가능성과 표면 환경은 활발한 연구 주제입니다."] },
+      { title: "과학적 가치", bullets: ["가장 가까운 항성계라 차세대 직접관측 목표 1순위 중 하나입니다.", "적색왜성 주변 생명 거주 가능성 평가의 핵심 기준 천체입니다.", "심우주 탐사 개념 연구(광돛 등)에서 자주 가정되는 목적지입니다."] }
     ]
   },
   mercury: {
@@ -434,6 +496,13 @@ const PLANET_SATELLITES = {
     { name: "Venus", orbit: 1.62, size: 0.024, speed: 0.00014, phase: 1.2, color: "#dfb07b", incl: 0.07 },
     { name: "Earth", orbit: 1.88, size: 0.026, speed: 0.00011, phase: 2.2, color: "#7fb9ff", incl: 0.06 },
     { name: "Mars", orbit: 2.1, size: 0.021, speed: 0.00009, phase: 2.9, color: "#c37b57", incl: 0.11 }
+  ],
+  sirius: [
+    { name: "Sirius B", orbit: 1.6, size: 0.03, speed: 0.0012, phase: 0.8, color: "#e8f4ff", incl: 0.2 }
+  ],
+  proxima: [
+    { name: "Proxima b", orbit: 1.48, size: 0.026, speed: 0.00135, phase: 0.6, color: "#d8b39c", incl: 0.18 },
+    { name: "Proxima d", orbit: 1.74, size: 0.02, speed: 0.0019, phase: 2.2, color: "#b98c76", incl: 0.14 }
   ],
   mercury: [
     { name: "Bepi", orbit: 1.42, size: 0.02, speed: 0.0018, phase: 0.7, color: "#d4d8df", incl: 0.2 }
