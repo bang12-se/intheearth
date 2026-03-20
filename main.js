@@ -940,7 +940,7 @@ function getPlanetTextureSettings(planet) {
     return { latStep: 0.62, lonStep: 0.62, pointSize: 0.52, cloudStep: 1.18 };
   }
   if (planet.style === "earth") {
-    return { latStep: 0.38, lonStep: 0.38, pointSize: 0.4, cloudStep: 0.82 };
+    return { latStep: 0.42, lonStep: 0.42, pointSize: 0.42, cloudStep: 0.9 };
   }
   return { latStep: 0.56, lonStep: 0.56, pointSize: 0.48, cloudStep: 1.02 };
 }
@@ -996,7 +996,7 @@ function drawPlanetTexture(cx, cy, radius, sun, nowMs, planet) {
 }
 
 function drawEarthContinents(cx, cy, radius, nowMs) {
-  const segments = state.lowPerf ? 128 : 260;
+  const segments = state.lowPerf ? 112 : 220;
   for (const blob of CONTINENT_BLOBS) {
     const p = rotateVec(latLonToVec(blob.lat, blob.lon));
     if (p.z <= -0.04) continue;
@@ -1742,7 +1742,8 @@ function initEvents() {
 
 function animate() {
   const now = performance.now();
-  if (now - state.lastRenderTs < 66) {
+  const minFrameInterval = state.lowPerf ? 33 : 16;
+  if (now - state.lastRenderTs < minFrameInterval) {
     requestAnimationFrame(animate);
     return;
   }
