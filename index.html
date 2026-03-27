@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta
     name="description"
-    content="Geo Signal Tracker는 태양계 천체를 인터랙티브 뷰로 탐색하는 소개형 시뮬레이션 웹사이트입니다."
+    content="Geo Signal Tracker는 태양계 천체를 인터랙티브 시뮬레이션과 해설형 콘텐츠로 함께 제공하는 교육형 우주 탐색 웹사이트입니다."
   />
   <meta name="robots" content="index,follow,max-image-preview:large" />
   <meta name="google-adsense-account" content="ca-pub-2915741349735828" />
-  <title>Planet Strike Console</title>
+  <link rel="canonical" href="https://intheearth.web.app/" />
+  <title>Geo Signal Tracker | 태양계 인터랙티브 가이드</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -17,6 +18,16 @@
     rel="stylesheet"
   />
   <link href="/style.css" rel="stylesheet" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Geo Signal Tracker",
+      "url": "https://intheearth.web.app/",
+      "inLanguage": "ko",
+      "description": "태양계 천체를 인터랙티브 시뮬레이션과 해설형 콘텐츠로 함께 제공하는 교육형 웹사이트"
+    }
+  </script>
   <script
     async
     src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2915741349735828"
@@ -24,101 +35,220 @@
   ></script>
 </head>
 <body>
-  <main class="earth-app">
-    <section class="globe-stage panel">
-      <canvas id="globe-canvas" width="900" height="900" aria-label="interactive earth"></canvas>
+  <a class="skip-link" href="#main-content">본문으로 건너뛰기</a>
 
-      <header class="top-bar">
-        <div class="brand">SOLAR STRIKE // PLANETARY CONTROL</div>
-        <form id="strike-form" autocomplete="off" class="search-wrap">
-          <select id="planet-select" name="planet" aria-label="Select planet">
-            <option value="sun">Sun</option>
-            <option value="mercury">Mercury</option>
-            <option value="venus">Venus</option>
-            <option value="earth" selected>Earth</option>
-            <option value="mars">Mars</option>
-            <option value="jupiter">Jupiter</option>
-            <option value="saturn">Saturn</option>
-            <option value="uranus">Uranus</option>
-            <option value="neptune">Neptune</option>
-            <option value="pluto">Pluto</option>
-          </select>
-          <p class="intro-chip">실시간 행성 뷰를 드래그하고 줌으로 탐색하는 인터랙티브 소개 화면입니다.</p>
-          <button id="fire-btn" type="button">서비스 소개</button>
-        </form>
-      </header>
-
-      <aside class="left-panel panel">
-        <p class="eyebrow">Orbital Weapon Grid</p>
-        <h1 id="mission-title">Earth From Space</h1>
-        <p id="mission-sub" class="sub">우주에서 지구를 바라보는 탐색 화면입니다. 드래그와 줌으로 자유롭게 둘러보세요.</p>
-
-        <form class="scan-form">
-          <button id="scan-btn" class="secondary" type="button">Reset Targets</button>
-        </form>
-
-        <div class="hud-grid">
-          <div class="stat"><span>Score</span><strong id="score">0</strong></div>
-          <div class="stat"><span>Scans</span><strong id="shots">0</strong></div>
-          <div class="stat"><span>Detections</span><strong id="hits">0</strong></div>
-          <div class="stat"><span>Cooldown</span><strong id="cooldown">Ready</strong></div>
-        </div>
-
-        <details class="drawer" open>
-          <summary>Signal Nodes</summary>
-          <ul id="node-list"></ul>
-        </details>
-
-        <details class="drawer">
-          <summary>Mission Log</summary>
-          <ul id="log"></ul>
-        </details>
-      </aside>
-
-      <div class="map-tools">
-        <button id="drag-mode" aria-label="Toggle drag target">P</button>
-        <button id="cinema-mode" aria-label="Toggle cinema mode">C</button>
-        <button id="compass-btn" aria-label="Reset north">
-          <span id="compass-needle">▲</span>
-        </button>
-        <button id="zoom-in" aria-label="Zoom in">+</button>
-        <button id="zoom-out" aria-label="Zoom out">-</button>
-        <button id="tilt-up" aria-label="Tilt up">⌃</button>
-        <button id="tilt-down" aria-label="Tilt down">⌄</button>
-        <button id="reset-view" aria-label="Reset view">N</button>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div>
+        <p class="site-kicker">Original educational content about the Solar System</p>
+        <h1 class="site-title">Geo Signal Tracker</h1>
+        <p class="site-summary">
+          Geo Signal Tracker는 태양, 행성, 왜소행성, 주요 항성의 기본 특성과 관측 포인트를
+          한곳에서 정리한 우주 탐색 가이드입니다. 방문자는 먼저 설명형 콘텐츠를 읽고,
+          이어서 인터랙티브 시뮬레이션에서 시점 변화와 행성별 시각 차이를 직접 확인할 수 있습니다.
+        </p>
       </div>
 
-      <aside id="planet-info" class="planet-info panel">
-        <p class="planet-info-title">Planet Profile</p>
-        <div class="planet-info-grid">
-          <div><span>Type</span><strong id="info-type">-</strong></div>
-          <div><span>Radius</span><strong id="info-radius">-</strong></div>
-          <div><span>Gravity</span><strong id="info-gravity">-</strong></div>
-          <div><span>Day</span><strong id="info-day">-</strong></div>
-          <div><span>Year</span><strong id="info-year">-</strong></div>
-          <div><span>Moons</span><strong id="info-moons">-</strong></div>
-        </div>
-      </aside>
+      <nav class="site-nav" aria-label="주요 탐색">
+        <a href="#why-this-site">사이트 소개</a>
+        <a href="#planet-guide">행성 가이드</a>
+        <a href="#interactive-explorer">인터랙티브 보기</a>
+        <a href="#editorial-policy">운영 원칙</a>
+        <a href="/about.html">운영자 소개</a>
+        <a href="/guide.html">이용 가이드</a>
+        <a href="/privacy.html">개인정보 처리방침</a>
+        <a href="/terms.html">이용약관</a>
+        <a href="/contact.html">문의</a>
+      </nav>
+    </div>
+  </header>
 
-      <footer class="status-bar">
-        <span id="view-coord">Lat ---, Lon ---</span>
-        <span id="view-zoom">Zoom x1.00</span>
-        <span id="view-heading">Heading ---</span>
-        <span id="view-tilt">Tilt ---</span>
-        <span id="view-alt">Alt --- km</span>
-        <span id="view-target">Target Earth</span>
-      </footer>
-    </section>
-
-    <section class="content-shell">
-      <article class="content-card">
-        <h2>서비스 소개</h2>
+  <main id="main-content" class="page-shell">
+    <section class="hero-grid">
+      <article class="content-card hero-card">
+        <h2>이 사이트가 제공하는 것</h2>
         <p>
-          Geo Signal Tracker는 태양계 천체를 인터랙티브 3D 스타일 화면으로 탐색할 수 있는 소개형 시뮬레이션입니다.
-          드래그, 줌, 틸트 컨트롤로 시점을 바꾸며 각 행성의 분위기와 시각적 특징을 직관적으로 살펴볼 수 있습니다.
+          이 사이트는 단순한 시각 효과 데모가 아니라, 태양계 천체를 빠르게 이해할 수 있도록
+          설계된 설명형 콘텐츠 허브입니다. 각 천체별로 물리적 특성, 관측 가치, 대표 사실,
+          초보자를 위한 읽는 순서를 함께 제공합니다.
+        </p>
+        <p>
+          특히 메인 인터랙티브 화면은 콘텐츠를 보조하는 기능으로 배치했습니다.
+          먼저 텍스트 설명을 읽고 핵심 차이를 이해한 뒤, 인터랙티브 장면에서 지구형 행성과 가스 행성,
+          항성의 시각적 분위기를 비교하는 방식으로 활용할 수 있습니다.
         </p>
       </article>
 
+      <article class="content-card hero-card">
+        <h2>누구를 위한 콘텐츠인가</h2>
+        <p>
+          학교 과제 준비, 자녀와 함께 보는 기초 우주 학습, 행성별 특성 차이를 가볍게 정리하려는 일반 방문자를
+          주요 독자로 상정했습니다. 전문 논문 수준의 계산보다, 이해하기 쉬운 구조와 탐색 편의성을 우선합니다.
+        </p>
+        <ul>
+          <li>행성별 크기, 자전, 공전, 중력, 위성 수를 빠르게 확인할 수 있습니다.</li>
+          <li>항성, 암석형 행성, 가스 행성, 얼음 거대행성의 특징을 직관적으로 구분할 수 있습니다.</li>
+          <li>브라우저에서 별도 설치 없이 바로 탐색할 수 있습니다.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section id="why-this-site" class="content-shell content-shell-wide">
+      <article class="content-card">
+        <h2>사이트 소개</h2>
+        <p>
+          Geo Signal Tracker는 방문자가 첫 화면에서 바로 콘텐츠 목적을 이해할 수 있도록
+          소개 문단, 가이드, 정책 링크, 운영 정보, 자주 묻는 질문을 함께 제공합니다.
+          광고보다 콘텐츠 가치를 우선하며, 페이지마다 실질적인 설명이 있는 경우에만 광고 노출을 고려합니다.
+        </p>
+        <h3>콘텐츠 설계 원칙</h3>
+        <ul>
+          <li>각 페이지는 독립적으로 읽어도 목적이 분명해야 합니다.</li>
+          <li>짧은 문장 나열 대신, 사용자가 왜 읽어야 하는지 설명하는 문단을 포함합니다.</li>
+          <li>화면 상단에는 반드시 사이트 주제와 방문 이점을 먼저 배치합니다.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>콘텐츠 구성</h2>
+        <p>
+          메인 페이지는 개요와 핵심 안내를 제공하고, 행성 프로필 영역은 선택한 천체의 기본 수치와 특징을
+          상세하게 풀어 설명합니다. 보조 문서로는 운영자 소개, 이용 가이드, 개인정보 처리방침, 이용약관,
+          문의 페이지를 제공해 실제 운영 사이트에 필요한 신뢰 요소를 공개합니다.
+        </p>
+        <p class="policy-links">
+          <a href="/about.html">운영자 소개</a>
+          <a href="/guide.html">이용 가이드</a>
+          <a href="/privacy.html">개인정보 처리방침</a>
+          <a href="/terms.html">이용약관</a>
+          <a href="/contact.html">문의</a>
+        </p>
+      </article>
+    </section>
+
+    <section id="planet-guide" class="content-shell content-shell-wide">
+      <article class="content-card">
+        <h2>행성별로 무엇을 읽을 수 있나</h2>
+        <p>
+          태양은 에너지 생성과 자기 활동을 중심으로, 수성·금성·지구·화성은 지형과 대기,
+          목성·토성·천왕성·해왕성은 대기 밴드와 내부 구조 차이를 중심으로 정리했습니다.
+          왜소행성 명왕성과 일부 밝은 항성은 비교 관찰용 확장 콘텐츠로 제공합니다.
+        </p>
+        <ul>
+          <li>암석형 행성: 표면 지형, 대기 유무, 충돌 흔적, 온도 환경</li>
+          <li>가스 행성: 대기 밴드, 폭풍 구조, 고리와 위성계</li>
+          <li>항성: 밝기, 온도, 분광형, 관측 포인트</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>초보자 추천 읽기 순서</h2>
+        <ol>
+          <li>지구와 화성을 먼저 비교해 대기와 지표 차이를 이해합니다.</li>
+          <li>목성과 토성을 보며 가스 행성의 구조와 위성계를 확인합니다.</li>
+          <li>천왕성과 해왕성을 통해 얼음 거대행성의 특징을 구분합니다.</li>
+          <li>태양과 시리우스를 보며 항성과 행성의 근본적 차이를 정리합니다.</li>
+        </ol>
+      </article>
+    </section>
+
+    <section id="interactive-explorer" class="interactive-section">
+      <div class="interactive-intro content-card">
+        <h2>인터랙티브 천체 탐색기</h2>
+        <p>
+          아래 시뮬레이션은 상단 설명 콘텐츠를 보조하는 인터랙티브 기능입니다.
+          행성을 선택하고 회전, 확대, 기울기 조절을 해보면 표면 질감과 조명 표현이 어떻게 달라지는지 확인할 수 있습니다.
+          기능은 시각 학습 보조를 위한 것이며, 메인 목적은 천체에 대한 원본 설명 콘텐츠 제공에 있습니다.
+        </p>
+      </div>
+
+      <section class="globe-stage panel">
+        <canvas id="globe-canvas" width="900" height="900" aria-label="interactive earth"></canvas>
+
+        <header class="top-bar">
+          <div class="brand">SOLAR STRIKE // PLANETARY CONTROL</div>
+          <form id="strike-form" autocomplete="off" class="search-wrap">
+            <select id="planet-select" name="planet" aria-label="Select planet">
+              <option value="sun">Sun</option>
+              <option value="mercury">Mercury</option>
+              <option value="venus">Venus</option>
+              <option value="earth" selected>Earth</option>
+              <option value="mars">Mars</option>
+              <option value="jupiter">Jupiter</option>
+              <option value="saturn">Saturn</option>
+              <option value="uranus">Uranus</option>
+              <option value="neptune">Neptune</option>
+              <option value="pluto">Pluto</option>
+            </select>
+            <p class="intro-chip">행성을 선택하고 드래그, 줌, 틸트로 시점을 바꾸며 시각 차이를 살펴보세요.</p>
+            <button id="fire-btn" type="button">서비스 소개</button>
+          </form>
+        </header>
+
+        <aside class="left-panel panel">
+          <p class="eyebrow">Orbital Education Console</p>
+          <h2 id="mission-title">Earth From Space</h2>
+          <p id="mission-sub" class="sub">우주에서 지구를 바라보는 탐색 화면입니다. 드래그와 줌으로 자유롭게 둘러보세요.</p>
+
+          <form class="scan-form">
+            <button id="scan-btn" class="secondary" type="button">Reset Targets</button>
+          </form>
+
+          <div class="hud-grid">
+            <div class="stat"><span>Score</span><strong id="score">0</strong></div>
+            <div class="stat"><span>Scans</span><strong id="shots">0</strong></div>
+            <div class="stat"><span>Detections</span><strong id="hits">0</strong></div>
+            <div class="stat"><span>Cooldown</span><strong id="cooldown">Ready</strong></div>
+          </div>
+
+          <details class="drawer" open>
+            <summary>Signal Nodes</summary>
+            <ul id="node-list"></ul>
+          </details>
+
+          <details class="drawer">
+            <summary>Mission Log</summary>
+            <ul id="log"></ul>
+          </details>
+        </aside>
+
+        <div class="map-tools">
+          <button id="drag-mode" aria-label="Toggle drag target">P</button>
+          <button id="cinema-mode" aria-label="Toggle cinema mode">C</button>
+          <button id="compass-btn" aria-label="Reset north">
+            <span id="compass-needle">▲</span>
+          </button>
+          <button id="zoom-in" aria-label="Zoom in">+</button>
+          <button id="zoom-out" aria-label="Zoom out">-</button>
+          <button id="tilt-up" aria-label="Tilt up">⌃</button>
+          <button id="tilt-down" aria-label="Tilt down">⌄</button>
+          <button id="reset-view" aria-label="Reset view">N</button>
+        </div>
+
+        <aside id="planet-info" class="planet-info panel">
+          <p class="planet-info-title">Planet Profile</p>
+          <div class="planet-info-grid">
+            <div><span>Type</span><strong id="info-type">-</strong></div>
+            <div><span>Radius</span><strong id="info-radius">-</strong></div>
+            <div><span>Gravity</span><strong id="info-gravity">-</strong></div>
+            <div><span>Day</span><strong id="info-day">-</strong></div>
+            <div><span>Year</span><strong id="info-year">-</strong></div>
+            <div><span>Moons</span><strong id="info-moons">-</strong></div>
+          </div>
+        </aside>
+
+        <footer class="status-bar">
+          <span id="view-coord">Lat ---, Lon ---</span>
+          <span id="view-zoom">Zoom x1.00</span>
+          <span id="view-heading">Heading ---</span>
+          <span id="view-tilt">Tilt ---</span>
+          <span id="view-alt">Alt --- km</span>
+          <span id="view-target">Target Earth</span>
+        </footer>
+      </section>
+    </section>
+
+    <section class="content-shell">
       <article class="content-card" id="planet-feature-card">
         <h2 id="planet-feature-title">지구의 특징</h2>
         <p id="planet-feature-intro">
@@ -131,30 +261,59 @@
       <article class="content-card">
         <h2>콘텐츠 품질 원칙</h2>
         <ul>
-          <li>중복 페이지를 만들지 않고, 단일 사이트에서 독창적인 정보를 제공합니다.</li>
-          <li>사용자가 원하는 정보를 빠르게 찾도록 명확한 탐색 구조를 유지합니다.</li>
-          <li>광고보다 콘텐츠 가치를 우선하며, 과도한 광고 배치를 지양합니다.</li>
-          <li>오해를 유도하는 문구나 클릭 유도형 인터페이스를 사용하지 않습니다.</li>
+          <li>중복 페이지를 만들지 않고, 사용자에게 도움이 되는 독창적 설명을 제공합니다.</li>
+          <li>광고가 있더라도 본문보다 앞서거나 본문을 가리지 않도록 설계합니다.</li>
+          <li>사이트 목적, 운영자 정보, 정책 문서를 공개해 신뢰 가능한 구조를 유지합니다.</li>
+          <li>검색 유입을 위한 빈 페이지나 자동 생성형 문서를 만들지 않습니다.</li>
         </ul>
       </article>
 
       <article class="content-card">
         <h2>이용 가이드</h2>
         <ol>
-          <li>상단 행성 선택 메뉴에서 보고 싶은 천체를 선택합니다.</li>
-          <li>마우스/터치 드래그로 시점을 회전하며 표면과 조명 변화를 확인합니다.</li>
+          <li>상단 설명 콘텐츠에서 먼저 보고 싶은 천체 범주를 파악합니다.</li>
+          <li>인터랙티브 화면에서 행성을 선택하고 드래그로 회전합니다.</li>
           <li>`+ / - / Tilt / Compass`로 확대, 축소, 기울기, 방향을 조절합니다.</li>
-          <li>하단 상태바에서 현재 방향, 고도, 타겟 행성 정보를 확인합니다.</li>
+          <li>하단 상태바와 우측 프로필 카드에서 현재 보기 정보를 확인합니다.</li>
         </ol>
+      </article>
+
+      <article class="content-card">
+        <h2>자주 묻는 질문</h2>
+        <h3>실시간 천문 관측 데이터 사이트인가요?</h3>
+        <p>
+          아닙니다. 이 사이트는 교육용 설명 콘텐츠와 인터랙티브 시각화를 제공하는 정적 웹사이트입니다.
+          실시간 관측 장비나 관측소 API와 직접 연결되지는 않습니다.
+        </p>
+        <h3>모바일에서도 사용할 수 있나요?</h3>
+        <p>
+          가능합니다. 다만 저사양 기기에서는 성능 안정성을 위해 일부 렌더링 품질이 자동으로 조정될 수 있습니다.
+        </p>
+      </article>
+    </section>
+
+    <section id="editorial-policy" class="content-shell content-shell-wide">
+      <article class="content-card">
+        <h2>운영 및 편집 정책</h2>
+        <p>
+          본 사이트는 방문자가 읽을 수 있는 실제 설명 콘텐츠가 없는 화면에 광고를 배치하지 않는 것을 원칙으로 합니다.
+          또한 자동 생성 페이지, 빈 카테고리 페이지, 의미 없는 전환용 화면을 운영하지 않습니다.
+        </p>
+        <p>
+          모든 주요 페이지는 목적 설명, 본문, 관련 링크, 운영 정보 중 하나 이상을 포함해야 하며,
+          광고는 사용자 이해를 보조하는 구조를 해치지 않는 범위에서만 고려합니다.
+        </p>
       </article>
 
       <article class="content-card">
         <h2>신뢰 정보</h2>
         <p>
-          본 사이트는 운영 정책, 개인정보 처리방침, 이용약관, 문의 채널을 공개합니다.
-          아래 문서를 통해 운영 기준을 확인할 수 있습니다.
+          운영 문서, 개인정보 처리방침, 이용약관, 문의 페이지는 별도 URL로 제공됩니다.
+          정책 문의나 수정 요청은 문의 페이지의 채널을 통해 접수할 수 있습니다.
         </p>
         <p class="policy-links">
+          <a href="/about.html">운영자 소개</a>
+          <a href="/guide.html">이용 가이드</a>
           <a href="/privacy.html">개인정보 처리방침</a>
           <a href="/terms.html">이용약관</a>
           <a href="/contact.html">문의</a>
@@ -162,6 +321,17 @@
       </article>
     </section>
   </main>
+
+  <footer class="site-footer">
+    <p>Geo Signal Tracker는 태양계 천체를 설명형 콘텐츠와 인터랙티브 시각화로 제공하는 교육형 웹사이트입니다.</p>
+    <p class="policy-links">
+      <a href="/about.html">운영자 소개</a>
+      <a href="/guide.html">이용 가이드</a>
+      <a href="/privacy.html">개인정보 처리방침</a>
+      <a href="/terms.html">이용약관</a>
+      <a href="/contact.html">문의</a>
+    </p>
+  </footer>
 
   <script defer src="/main.js"></script>
 </body>
