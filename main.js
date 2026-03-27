@@ -383,6 +383,32 @@ const PLANET_PRESETS = {
     halo: ["rgba(203, 184, 171, 0.14)", "rgba(203, 184, 171, 0)"],
     ring: null,
     marker: "#f0e0d2"
+  },
+  blackhole: {
+    label: "Black Hole",
+    title: "Black Hole Gravity Well",
+    subtitle: "강착 원반과 중력 렌즈 효과를 시각화합니다.",
+    altitudeBase: 60,
+    spinSpeed: 0.00016,
+    cloudSpeed: 0.0012,
+    style: "blackhole",
+    palette: { a: [42, 34, 26], b: [120, 82, 54], c: [255, 194, 118] },
+    halo: ["rgba(255, 171, 94, 0.16)", "rgba(255, 171, 94, 0)"],
+    ring: { inner: 1.08, outer: 1.48, color: "rgba(255, 174, 96, 0.42)" },
+    marker: "#ffb86c"
+  },
+  oort: {
+    label: "Oort Cloud",
+    title: "Oort Cloud Deep Survey",
+    subtitle: "태양계를 감싸는 먼 얼음 천체 구름을 시각화합니다.",
+    altitudeBase: 750000000,
+    spinSpeed: 0.00004,
+    cloudSpeed: 0.00018,
+    style: "oort",
+    palette: { a: [102, 136, 176], b: [52, 77, 118], c: [208, 232, 255] },
+    halo: ["rgba(173, 218, 255, 0.13)", "rgba(173, 218, 255, 0)"],
+    ring: null,
+    marker: "#d5ecff"
   }
 };
 
@@ -407,7 +433,9 @@ const PLANET_INFO = {
   saturn: { type: "Gas Giant", gravity: "10.4 m/s²", day: "10.7 h", year: "29.4 y", moons: "140+" },
   uranus: { type: "Ice Giant", gravity: "8.69 m/s²", day: "17.2 h", year: "84 y", moons: "27" },
   neptune: { type: "Ice Giant", gravity: "11.2 m/s²", day: "16.1 h", year: "164.8 y", moons: "14" },
-  pluto: { type: "Dwarf Planet", gravity: "0.62 m/s²", day: "6.4 d", year: "248 y", moons: "5" }
+  pluto: { type: "Dwarf Planet", gravity: "0.62 m/s²", day: "6.4 d", year: "248 y", moons: "5" },
+  blackhole: { type: "Stellar-mass Black Hole", gravity: "Event horizon", day: "Spin-dependent", year: "-", moons: "0" },
+  oort: { type: "Icy Body Reservoir", gravity: "Very weak local binding", day: "-", year: "수천~수만 년", moons: "수조 개 후보" }
 };
 
 const PLANET_MOON_LIST = {
@@ -431,7 +459,9 @@ const PLANET_MOON_LIST = {
   saturn: ["타이탄", "엔셀라두스", "레아", "이아페투스"],
   uranus: ["티타니아", "오베론", "움브리엘", "아리엘", "미란다"],
   neptune: ["트리톤", "네레이드", "프로테우스"],
-  pluto: ["카론", "닉스", "히드라", "케르베로스", "스틱스"]
+  pluto: ["카론", "닉스", "히드라", "케르베로스", "스틱스"],
+  blackhole: ["강착 원반", "광자 구", "상대론적 제트 후보"],
+  oort: ["장주기 혜성 핵", "얼음 미행성체", "산란원반 외곽 천체"]
 };
 
 const PLANET_FEATURE_CONTENT = {
@@ -574,6 +604,40 @@ const PLANET_FEATURE_CONTENT = {
       { title: "초거성 특성", bullets: ["큰 반지름과 낮은 표면 온도로 붉게 보입니다.", "강한 질량 손실과 복잡한 외곽층 구조를 가집니다.", "진화 말기 대질량 별 연구에 중요합니다."] },
       { title: "쌍성 동반", bullets: ["청색 동반성 Antares B가 알려져 있습니다.", "밝은 주성 때문에 동반성 관측 난이도가 높습니다.", "고해상도 관측 장비에서 분리 관측됩니다."] },
       { title: "관측 포인트", bullets: ["여름철 남쪽 하늘의 전갈자리 중심부에서 눈에 띕니다.", "적색 색감이 매우 강해 육안 식별이 쉽습니다.", "달·행성과의 근접 이벤트 관측 대상입니다."] }
+    ]
+  },
+  blackhole: {
+    title: "블랙홀의 특징",
+    intro: "블랙홀은 탈출 속도가 빛의 속도를 넘는 시공간 영역으로, 주변 물질이 떨어질 때 강착 원반과 고에너지 복사가 형성될 수 있습니다.",
+    facts: [
+      ["대표 범주", "항성질량 블랙홀"],
+      ["경계", "사건의 지평선"],
+      ["관측 단서", "강착 원반, 제트, 중력 렌즈"],
+      ["직접 관측", "주변 물질의 거동으로 추정"],
+      ["빛 탈출", "불가"],
+      ["상대론 효과", "매우 강함"]
+    ],
+    sections: [
+      { title: "형성", bullets: ["큰 질량의 별이 진화 끝에 붕괴하면 항성질량 블랙홀이 생길 수 있습니다.", "은하 중심에는 태양 질량 수백만 배 이상의 초대질량 블랙홀이 존재하는 것으로 추정됩니다.", "블랙홀의 유형은 질량 규모와 형성 경로에 따라 구분됩니다."] },
+      { title: "관측 방법", bullets: ["블랙홀 자체는 빛을 내지 않지만, 주변 강착 원반은 매우 밝게 빛날 수 있습니다.", "동반성의 공전 운동과 X선 방출을 통해 존재를 추정할 수 있습니다.", "강한 중력은 배경 빛을 휘게 만들어 렌즈 효과를 만듭니다."] },
+      { title: "핵심 개념", bullets: ["사건의 지평선 안쪽에서는 외부로 정보가 빠져나오기 어렵습니다.", "회전하는 블랙홀은 주변 시공간을 함께 끌고 가는 프레임 드래깅을 유발합니다.", "블랙홀 연구는 중력, 고에너지 천체물리, 일반상대성이론 검증과 연결됩니다."] }
+    ]
+  },
+  oort: {
+    title: "오르트 구름의 특징",
+    intro: "오르트 구름은 태양계를 매우 멀리 둘러싼 것으로 가정되는 얼음 천체 저장고로, 장주기 혜성의 기원 후보로 자주 설명됩니다.",
+    facts: [
+      ["위치", "태양계 바깥 극원거리"],
+      ["주요 구성", "얼음 천체와 미행성체"],
+      ["대표 현상", "장주기 혜성 공급원 가설"],
+      ["형태", "구형에 가까운 분포 가정"],
+      ["거리 규모", "수천~수만 AU 추정"],
+      ["직접 관측", "아직 어려움"]
+    ],
+    sections: [
+      { title: "무엇인가", bullets: ["오르트 구름은 아직 직접 촬영된 구조가 아니라, 혜성 궤도 특성을 바탕으로 추정되는 가설적 저장고입니다.", "카이퍼 벨트보다 훨씬 바깥에서 태양계를 넓게 감싸는 구형 분포로 자주 묘사됩니다.", "태양 중력과 주변 항성의 교란이 함께 영향을 주는 느슨한 외곽 영역입니다."] },
+      { title: "왜 중요한가", bullets: ["장주기 혜성이 태양계 안쪽으로 들어오는 기원을 설명하는 핵심 개념입니다.", "태양계 형성 초기에 바깥으로 산란된 작은 천체들의 흔적을 보존했을 가능성이 있습니다.", "외부 별의 중력 섭동과 은하 조석력이 장기 궤도 진화에 영향을 줄 수 있습니다."] },
+      { title: "관측 포인트", bullets: ["오르트 구름 자체보다, 그로부터 유입된 것으로 보이는 혜성 궤도 분포를 통해 간접 연구합니다.", "따라서 시각화에서는 개별 고체 표면보다 희박한 얼음 입자 구름으로 표현하는 편이 적절합니다.", "태양계 경계 구조를 이해하는 교육용 주제로 가치가 큽니다."] }
     ]
   },
   mercury: {
@@ -1076,7 +1140,7 @@ function renderPlanetFeatureCard() {
   planetFeatureSectionsEl.textContent = "";
 
   const moonTitle = document.createElement("h3");
-  moonTitle.textContent = getCurrentPlanet().style === "sun" ? "주요 천체" : "주요 위성";
+  moonTitle.textContent = ["sun", "blackhole", "oort"].includes(getCurrentPlanet().style) ? "주요 구성 요소" : "주요 위성";
   planetFeatureSectionsEl.appendChild(moonTitle);
 
   const moonList = document.createElement("ul");
@@ -1330,6 +1394,26 @@ function getPlanetColor(planet, lat, lon, detail, light, now) {
     }
   }
 
+  if (planet.style === "blackhole") {
+    const radial = clamp(Math.sqrt(lat * lat + lon * lon * 0.018) / 140, 0, 1);
+    const ringPulse = 0.5 + 0.5 * Math.sin((lon + now * 18000) * 0.11 + lat * 0.06);
+    base = [
+      8 + ringPulse * 18 + radial * 10,
+      10 + ringPulse * 11 + radial * 8,
+      16 + ringPulse * 7 + radial * 16
+    ];
+    reliefBoost = -0.02;
+  } else if (planet.style === "oort") {
+    const haze = 0.5 + 0.5 * Math.sin((lon + now * 1800) * 0.04 + lat * 0.09);
+    const frost = 0.5 + 0.5 * terrainNoise(lat, lon + now * 900, 0.08, 0.05);
+    base = [
+      78 + haze * 35 + frost * 28,
+      107 + haze * 42 + frost * 32,
+      148 + haze * 60 + frost * 52
+    ];
+    reliefBoost = 0.03 + frost * 0.04;
+  }
+
   const lit = clamp(light + reliefBoost, 0.07, 1.12);
   return `rgb(${Math.round(base[0] * lit)}, ${Math.round(base[1] * lit)}, ${Math.round(base[2] * lit)})`;
 }
@@ -1390,6 +1474,8 @@ function drawAtmosphere(cx, cy, radius, planet) {
 
 function getPlanetRimColor(planet) {
   if (planet.style === "sun") return "rgba(255, 178, 102, 0.75)";
+  if (planet.style === "blackhole") return "rgba(255, 178, 126, 0.52)";
+  if (planet.style === "oort") return "rgba(194, 231, 255, 0.52)";
   if (planet.label === "Mars") return "rgba(255, 169, 133, 0.66)";
   if (planet.label === "Jupiter") return "rgba(245, 212, 176, 0.66)";
   if (planet.label === "Saturn") return "rgba(248, 226, 185, 0.7)";
@@ -1459,6 +1545,60 @@ function drawSolarFlares(cx, cy, radius, planet, now) {
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawBlackHoleFx(cx, cy, radius, nowMs) {
+  const pulse = 0.5 + 0.5 * Math.sin(nowMs * 0.0022);
+  const horizon = ctx.createRadialGradient(cx, cy, radius * 0.08, cx, cy, radius * 0.48);
+  horizon.addColorStop(0, "rgba(0, 0, 0, 1)");
+  horizon.addColorStop(0.72, "rgba(6, 6, 12, 0.98)");
+  horizon.addColorStop(1, "rgba(22, 16, 28, 0)");
+  ctx.fillStyle = horizon;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 0.48, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(nowMs * 0.00022 + state.yaw * 0.18);
+  ctx.scale(1, 0.42 + Math.cos(state.pitch) * 0.08);
+  const disk = ctx.createRadialGradient(0, 0, radius * 0.56, 0, 0, radius * 1.58);
+  disk.addColorStop(0, "rgba(255, 186, 108, 0)");
+  disk.addColorStop(0.18, `rgba(255, 186, 108, ${0.36 + pulse * 0.16})`);
+  disk.addColorStop(0.5, `rgba(255, 132, 58, ${0.2 + pulse * 0.08})`);
+  disk.addColorStop(1, "rgba(255, 132, 58, 0)");
+  ctx.fillStyle = disk;
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 1.58, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = `rgba(255, 218, 164, ${0.22 + pulse * 0.14})`;
+  ctx.lineWidth = radius * 0.018;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, radius * 1.32, radius * 0.54, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawOortCloudFx(cx, cy, radius, nowMs) {
+  const particleCount = state.lowPerf ? 120 : 260;
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+  for (let i = 0; i < particleCount; i += 1) {
+    const seed = i * 1.37;
+    const angle = seed * 2.17 + nowMs * 0.00002;
+    const spread = 0.7 + 0.3 * Math.sin(seed * 4.9 + nowMs * 0.0004);
+    const orbit = radius * (0.72 + (i % 37) / 37 * 0.92 + spread * 0.32);
+    const x = cx + Math.cos(angle) * orbit;
+    const y = cy + Math.sin(angle * 1.11 + seed) * orbit * 0.58;
+    const alpha = 0.03 + ((i % 9) / 9) * 0.08;
+    const size = 0.9 + (i % 4) * 0.45;
+    ctx.fillStyle = `rgba(210, 236, 255, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fill();
   }
   ctx.restore();
 }
@@ -1546,6 +1686,12 @@ function getPlanetTextureSettings(planet) {
   if (planet.style === "sun" || planet.style === "gas" || planet.style === "ice") {
     return { latStep: 0.62, lonStep: 0.62, pointSize: 0.52, cloudStep: 1.18 };
   }
+  if (planet.style === "blackhole") {
+    return { latStep: 0.78, lonStep: 0.78, pointSize: 0.58, cloudStep: 1.4 };
+  }
+  if (planet.style === "oort") {
+    return { latStep: 0.92, lonStep: 0.92, pointSize: 0.72, cloudStep: 1.75 };
+  }
   if (planet.style === "earth") {
     return { latStep: 0.42, lonStep: 0.42, pointSize: 0.42, cloudStep: 0.9 };
   }
@@ -1573,7 +1719,11 @@ function drawPlanetTexture(cx, cy, radius, sun, nowMs, planet) {
   }
 
   const needsClouds =
-    planet.style === "earth" || planet.style === "venus" || planet.style === "gas" || planet.style === "ice";
+    planet.style === "earth" ||
+    planet.style === "venus" ||
+    planet.style === "gas" ||
+    planet.style === "ice" ||
+    planet.style === "oort";
 
   if (!needsClouds) {
     return;
@@ -1596,6 +1746,7 @@ function drawPlanetTexture(cx, cy, radius, sun, nowMs, planet) {
       if (planet.style === "venus") cloudColor = "255, 218, 164";
       if (planet.style === "gas") cloudColor = "245, 226, 198";
       if (planet.style === "ice") cloudColor = "210, 236, 255";
+      if (planet.style === "oort") cloudColor = "214, 238, 255";
       ctx.fillStyle = `rgba(${cloudColor}, ${alpha})`;
       ctx.fillRect(x - s * 0.5, y - s * 0.5, s, s);
     }
@@ -1764,6 +1915,8 @@ function drawImpactMarks(cx, cy, radius, nowMs) {
 
 function getSolarSmashAccent(planet) {
   if (planet.style === "sun") return "255, 170, 96";
+  if (planet.style === "blackhole") return "255, 170, 112";
+  if (planet.style === "oort") return "183, 225, 255";
   if (planet.style === "gas") return "255, 198, 142";
   if (planet.style === "ice") return "156, 211, 255";
   if (planet.label === "Earth") return "126, 194, 255";
@@ -1772,7 +1925,7 @@ function getSolarSmashAccent(planet) {
 }
 
 function drawSolarSmashCracks(cx, cy, radius, planet, nowMs) {
-  if (planet.style === "sun" || planet.style === "gas" || planet.style === "ice") return;
+  if (planet.style === "sun" || planet.style === "gas" || planet.style === "ice" || planet.style === "blackhole" || planet.style === "oort") return;
 
   const pulse = 0.55 + 0.45 * Math.sin(nowMs * 0.0021);
   ctx.save();
@@ -1884,6 +2037,9 @@ function drawGlobe() {
       : getSatelliteStates(state.currentPlanet, cx, cy, radius, nowMs);
 
   drawSpaceBackground(width, height, nowMs, cx, cy, radius);
+  if (planet.style === "oort") {
+    drawOortCloudFx(cx, cy, radius, nowMs);
+  }
   if (!state.dragging && (!state.lowPerf || allowLowPerfEarthMoon)) {
     drawSatelliteOrbits(cx, cy, satelliteStates);
     drawSatellites(satelliteStates, false);
@@ -1958,8 +2114,12 @@ function drawGlobe() {
   ctx.beginPath();
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
   ctx.fill();
-  if (!state.lowPerf) {
+  if (!state.lowPerf && planet.style !== "blackhole") {
     drawAtmosphere(cx, cy, radius, planet);
+  }
+
+  if (planet.style === "blackhole") {
+    drawBlackHoleFx(cx, cy, radius, nowMs);
   }
 
   if (planet.style === "sun" && !state.lowPerf) {
